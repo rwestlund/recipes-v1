@@ -1,0 +1,242 @@
+\documentclass[11pt]{article}
+\usepackage{multicol}
+\usepackage{mdwlist}
+\usepackage{enumitem}
+\usepackage[left=0.3in,right=0.3in,top=0.3in,bottom=0.3in]{geometry}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{amsmath}
+
+\setlength{\parindent}{0in}
+ 
+\begin{document}
+
+\newcommand{\ctaheader}{
+\centerline{\Large\textbf{Work Order {{job.jobNumber}}} 
+\small version {{job.__v}} {{^job.__v}}0{{/job.__v}} }
+{{#job.jobName}}
+  \centerline{``{{job.jobName}}''}
+{{/job.jobName}}
+\centerline{\textbf{due {{get_due_date}} }}
+
+% add top left and top right info
+\vspace{-2em}
+{{#job.jobName}}
+  \vspace{-1em}
+{{/job.jobName}}
+\begin{tabular}{rl>{\hfill}p{5in}}
+  Generated: & \today & {{#job.isHardDeadline}} Hard Deadline {{/job.isHardDeadline}} \\
+  Sales Rep: & {{salesRep.firstName}} {{salesRep.lastName}} & {{#job.isPriority}} Priority Job {{/job.isPriority}} \\
+  Creation Date: & {{get_creation_date}} & {{#job.jobRackNo}}Plan Rack: {{job.jobRackNo}}{{/job.jobRackNo}} \\
+\end{tabular}
+
+% three part top header
+\setlength{\columnseprule}{0.3pt}
+\begin{multicols}{3}
+  \centerline{\textbf{Job Contact}}
+  \vspace{1em}
+  \begin{tabularx}{0.95\linewidth}{rX}
+  {{#job.contactName}}
+    Name: & {{name}} \\
+    Office: & {{office}} \\
+    Cell: & {{cell}} \\
+    Email: & {{email}} \\
+  {{/job.contactName}}
+  \\
+  Source: & {{jobSource.name}} \\
+
+  \end{tabularx}
+  \vfill
+  \columnbreak
+
+  \centerline{\textbf{Invoice To}}
+  \vspace{1em}
+  \begin{tabularx}{0.95\linewidth}{rX}
+    {{#isResidential}}
+      {{#job.customerName}}
+        Name: & {{name}} \\
+        Office: & {{office}} \\
+        Cell: & {{cell}} \\
+        Email: & {{email}} \\
+      {{/job.customerName}}
+    {{/isResidential}}
+    {{^isResidential}}
+      & {{customer.companyName.name}} \\
+      Office: & {{customer.companyName.office}} \\
+      Fax: & {{customer.companyName.fax}} \\
+    {{/isResidential}}
+  \end{tabularx}
+
+  \vspace{1em}
+  {{#job.billingAddress}}
+  \centerline{ {{number}} {{street}} }
+  \centerline{ {{city}}{{#city}},{{/city}} {{state}} {{postal}} }
+  {{/job.billingAddress}}
+  \vfill
+  \columnbreak
+
+  \centerline{\textbf{Location of Install}}
+  \vspace{1em}
+  {{#job.installationAddress}}
+  \centerline{ {{number}} {{street}} }
+  \centerline{ {{city}}{{#city}},{{/city}} {{state}} {{postal}} }
+  {{/job.installationAddress}}
+  \vspace{1em}
+
+  \centerline{\textbf{Superintendent}}
+  \begin{tabularx}{0.95\linewidth}{rX}
+  {{#job.superintendentName}}
+    Name: & {{name}} \\
+    Office: & {{office}} \\
+    Cell: & {{cell}} \\
+    Email: & {{email}} \\
+  {{/job.superintendentName}}
+  \end{tabularx}
+  \vfill
+\end{multicols}
+% end top header with contact info
+}
+
+
+{{#job.jobItems}}
+\ctaheader
+\centerline{\textbf{Item {{label}} }}
+
+% left col for fab
+\setlength{\columnseprule}{0pt}
+%\setlength{\columnsep}{0.5in}
+\begin{multicols}{2}
+  \begin{tabularx}{0.95\linewidth}{rX}
+  \multicolumn{2}{c}{\textbf{Fabrication}} \\
+    Quantity: & {{quantity}} \\
+    Type: & {{get_awning_string}}{{#subtype}}, {{subtype}}{{/subtype}}\\
+    {{#has_dimensions}}
+        \cline{1-1}
+        {{#has_drop}}
+          Drop: & {{frameDropFeet}} ft {{frameDropInches}} in \\
+        {{/has_drop}}
+        Projection: & {{frameProjectionFeet}} ft {{frameProjectionInches}} in \\
+        Width: & {{frameWidthFeet}} ft {{frameWidthInches}} in \\
+        \cline{1-1}
+    {{/has_dimensions}}
+    {{#has_material}}
+      Material: & {{materialNumber}}{{#materialDescription}}{{#materialNumber}},
+      {{materialDescription}}
+      {{/materialNumber}}{{/materialDescription}} \\
+    {{/has_material}}
+    {{#has_frame_color}}
+      Frame Color: & {{frameColor}} \\
+    {{/has_frame_color}}
+    {{#has_powdercoating}}
+        Powdercoated: &
+          {{#isPowdercoated}}
+            {{frameColorNumber}}{{#frameColorNumber}}{{#frameColorDesc}},
+              {{/frameColorDesc}} {{/frameColorNumber}}
+            {{frameColorDesc}}
+          {{/isPowdercoated}}
+          {{^isPowdercoated}} No {{/isPowdercoated}} \\
+    {{/has_powdercoating}}
+    {{#has_frame_type}}
+      \cline{1-1}
+      Frame Type: & {{frameType}} \\
+      {{#is_staple}}
+        PVC Color: & {{pvcColor}} \\
+      {{/is_staple}}
+    {{/has_frame_type}}
+    {{#has_frame_ends}}
+      Ends: & {{frameEndType}} \\
+    {{/has_frame_ends}}
+
+    {{#has_valance}}
+      \cline{1-1}
+      Valance: & {{valanceType}} \\
+      {{^valance_is_none}}
+        Length: & {{valanceLength}} in \\
+      {{/valance_is_none}}
+      {{#valance_is_loose}}
+        Scallop Style: & {{scallopStyle}} \\
+        Binding Color: & {{bindingColor}} \\
+      {{/valance_is_loose}}
+    {{/has_valance}}
+
+    {{#has_graphics}}
+      \cline{1-1}
+      Graphics: &
+      {{#hasGraphics}}{{graphicsDesc}}{{/hasGraphics}}
+      {{^hasGraphics}}No{{/hasGraphics}}
+    {{/has_graphics}}
+  \end{tabularx}
+  \vspace{1em}
+
+  \centerline{\textbf{Fabrication Instructions}}
+  {{fabricationInstructions}}
+  \vfill
+\columnbreak
+
+% right col for installation
+  \begin{tabularx}{0.95\linewidth}{rX}
+  \multicolumn{2}{c}{\textbf{Installation}} \\
+    {{#has_mounting}}
+        Mount Height: & {{mountingHeightFeet}} ft {{mountingHeightInches}} in \\
+        Clearance: & {{clearanceHeightFeet}} ft {{clearanceHeightInches}} in \\
+        Mounting Surface: & {{mountingSurface}} \\
+        {{#has_footing}}Footing: & {{footing}} {{/has_footing}}
+        \cline{1-1}
+    {{/has_mounting}}
+    {{#has_electrician}}
+        Electrician: & {{#needsElectrician}}Yes{{/needsElectrician}}
+            {{^needsElectrician}}No{{/needsElectrician}} \\
+    \cline{1-1}
+    {{/has_electrician}}
+    Call Ahead: &
+      {{#job.callAheadRequired}}Yes{{/job.callAheadRequired}}
+      {{^job.callAheadRequired}}No{{/job.callAheadRequired}} \\
+  \end{tabularx}
+  \vspace{1em}
+
+  \centerline{\textbf{Installation Instructions}}
+    {{job.installationInstructions}}
+  \vfill
+\end{multicols}
+\vfill
+Employee:
+\underset{\text{Name}}{\rule{6cm}{0.01cm}}
+\hspace{0.5cm}
+\underset{\text{Signature}}{\rule{6cm}{0.01cm}}
+\hspace{0.5cm}
+\underset{\text{Date}}{\rule{4cm}{0.01cm}}
+
+\vspace{0.3cm}
+Customer:
+\underset{\text{Name}}{\rule{6cm}{0.01cm}}
+\hspace{0.5cm}
+\underset{\text{Signature}}{\rule{6cm}{0.01cm}}
+\hspace{0.5cm}
+\underset{\text{Date}}{\rule{4cm}{0.01cm}}
+\newpage
+{{/job.jobItems}}
+
+
+{{^job.jobItems}}
+\ctaheader
+\centerline{This job has no items}
+\vfill
+
+Employee:
+\underset{\text{Name}}{\rule{6cm}{0.01cm}}
+\hspace{0.5cm}
+\underset{\text{Signature}}{\rule{6cm}{0.01cm}}
+\hspace{0.5cm}
+\underset{\text{Date}}{\rule{4cm}{0.01cm}}
+
+\vspace{0.3cm}
+Customer:
+\underset{\text{Name}}{\rule{6cm}{0.01cm}}
+\hspace{0.5cm}
+\underset{\text{Signature}}{\rule{6cm}{0.01cm}}
+\hspace{0.5cm}
+\underset{\text{Date}}{\rule{4cm}{0.01cm}}
+\newpage
+{{/job.jobItems}}
+
+\end{document}

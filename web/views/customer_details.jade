@@ -1,0 +1,207 @@
+// heading will be on same row as alerts
+// set up can_modify so I can disable everything for unprivileged users
+.row(ng-init="can_modify = (window.localStorage.user_role === 'ADMIN' "
+    + "|| window.localStorage.user_role === 'SALESMAN')")
+
+    .col-md-6.col-xs-12
+        h3.tight {{ customer.displayName }} 
+            small.text-muted version {{ customer.__v || 0 }}
+    .col-md-6.col-xs-12(ng-class="{ 'vis-hidden': !is_modified}")
+        alert.very-tight(type='{{alert.type}}') {{ alert.msg }}
+
+.row
+    .col-md-4.col-xs-12
+        button.btn.btn-success.btn-block(type='button' ng-click='save_changes()'
+            ng-disabled='!is_modified || !can_modify')
+            span.glyphicon.glyphicon-save
+            |  Save Changes
+        br
+    .col-md-2.col-xs-6
+        button.btn.btn-danger.btn-block(type='button' ng-disabled='!can_modify'
+            ng-click='open_delete_modal()')
+            span.glyphicon.glyphicon-trash
+            |  Delete Customer
+        br
+    .col-md-2.col-xs-6
+        button.btn.btn-info.btn-block(type='button' ng-click='refresh()')
+            span.glyphicon.glyphicon-refresh
+            |  Refresh
+        br
+    .col-md-2.col-xs-6
+        button.btn.btn-success.btn-block(type='button' ng-disabled='!can_modify'
+            ng-click='create_job(customer.id)')
+            span.glyphicon.glyphicon-plus
+            |  Create Job
+        br
+    .col-md-2.col-xs-6
+        button.btn.btn-success.btn-block(type='button' ng-disabled='!can_modify'
+            ng-click='create_appointment(customer.id)')
+            span.glyphicon.glyphicon-plus
+            |  Create Appt
+        br
+            
+
+// edit form
+.row
+    // start customer basic info col
+    .col-md-4.col-xs-12
+        .well
+            h3.tight Basic Info
+            .btn-group(dropdown is-open='type_dropdown.is_open')
+                label Customer Type
+                br
+                button.btn.btn-primary.dropdown-toggle(type='button'
+                    ng-disabled='!can_modify') {{ customer.type }} 
+                    span.caret
+                ul.dropdown-menu(role='menu')
+                    li: a(href='' ng-click="customer.type = 'Residential'; toggle_type_dropdown($event)") Residential
+                    li: a(href='' ng-click="customer.type = 'Business'; toggle_type_dropdown($event)") Business
+                    li: a(href='' ng-click="customer.type = 'Commercial'; toggle_type_dropdown($event)") Commercial
+            br
+            br
+
+            div(ng-if="customer.type != 'Residential'")
+                form(role='form' name='commercial_form')
+                    //- disabled if not write access
+                    fieldset(ng-disabled='!can_modify')
+
+                        .form-group(ng-class="{ 'has-error': " 
+                            + "commercial_form.company_name.$invalid }")
+
+                            label Company Name
+                            input.form-control(type='text' name='company_name'
+                                required ng-model='customer.companyName.name'
+                                ng-disabled='!can_modify')
+                            p.help-block(
+                                ng-show='commercial_form.company_name.$invalid'
+                                ) Company name is required
+
+                        .form-group
+                            label Office Phone
+                            input.form-control(type='tel' ng-model='customer.companyName.office')
+                        .form-group
+                            label Fax
+                            input.form-control(type='tel' ng-model='customer.companyName.fax')
+
+            form(role='form')
+                fieldset(ng-disabled='!can_modify')
+                    .form-group
+                        label Notes
+                        textarea.form-control(rows='3' ng-model='customer.notes')
+
+    // start contact col
+    .col-md-4.col-xs-12
+        .well(ng-repeat='name in customer.contacts')
+            h3.tight Contact
+            form(name='contact_form' role='form')
+                fieldset(ng-disabled='!can_modify')
+                    .form-group
+                        label First Name
+                        // put remove button on same line as first name
+                        .row
+                            .col-xs-6
+                                input.form-control(type='text' ng-model='name.firstName')
+                            .col-xs-6
+                                button.btn.btn-danger.btn-block(
+                                    ng-click='delete_contact(name)')
+                                    span.glyphicon.glyphicon-trash
+                                    |  Delete Contact
+
+                    .form-group(
+                        ng-class="{'has-error': contact_form.last_name.$invalid  && can_modify }")
+                        label Last Name
+                        input.form-control(type='text' name='last_name'
+                            ng-model='name.lastName' required)
+                        p.help-block(ng-show='contact_form.last_name.$invalid && can_modify'
+                            ) Last name is required
+
+                    .form-group
+                        label Label
+                        input.form-control(type='text' ng-model='name.label')
+                    .form-group
+                        label Cell Phone
+                        input.form-control(type='tel' ng-model='name.cell')
+                    .form-group
+                        label Home / Office Phone
+                        input.form-control(type='tel' ng-model='name.office')
+
+                    .form-group(ng-class="{ 'has-error': contact_form.email.$invalid && can_modify }")
+                        label Email
+                        input.form-control(name='email' type='email'
+                            ng-model='name.email')
+                        p.help-block(ng-show='contact_form.email.$invalid && can_modify'
+                            ) Email address is invalid
+        button.btn.btn-success.btn-block(ng-click="add_contact()"
+            ng-disabled='!can_modify')
+            span.glyphicon.glyphicon-plus
+            |  Add Contact
+
+        br
+
+    // start address col
+    .col-md-4.col-xs-12
+        .btn-group.btn-group-justified
+            label.btn.btn-info(ng-model='hide_inactive' btn-radio='false'
+                ) Show All
+            label.btn.btn-info(ng-model='hide_inactive' btn-radio='true'
+                ) Hide Inactive Addresses
+        br
+
+        .well.repeated-item(ng-repeat='addr in (hide_inactive ? '
+            + '(customer.addresses | filter:{current:true}) '
+            + ': customer.addresses)')
+            h3.tight Address
+            form(role='form')
+                fieldset(ng-disabled='!can_modify')
+
+                    .form-group
+                        label Street Number
+                        .row
+                            .col-xs-6
+                                input.form-control(type='text'
+                                    ng-model='addr.number')
+                            .col-xs-6
+                                button.btn.btn-danger.btn-block(
+                                    ng-click='delete_address(addr)')
+                                    span.glyphicon.glyphicon-trash
+                                    |  Delete Address
+                    .form-group
+                        label Street
+                        input.form-control(type='text' ng-model='addr.street')
+                    .form-group
+                        label City
+                        input.form-control(type='text' ng-model='addr.city')
+                    .form-group
+                        label State
+                        input.form-control(type='text' ng-model='addr.state')
+                    .form-group
+                        label Postal Code
+                        input.form-control(type='text' ng-model='addr.postal')
+                    .form-group
+                        label Label
+                        input.form-control(type='text' ng-model='addr.label')
+                    .btn-group.btn-group-justified
+                        label.btn.btn-primary.btn(ng-model='addr.current' btn-radio='true') Current Address
+                        label.btn.btn-primary.btn(ng-model='addr.current' btn-radio='false') Inactive Address
+
+        button.btn.btn-success.btn-block(ng-click="add_address()"
+            ng-disabled='!can_modify')
+            span.glyphicon.glyphicon-plus
+            |  Add Address
+
+
+// show jobs for this customer
+button.btn.btn-info(ng-click='is_collapsed = !is_collapsed')
+    span.glyphicon.glyphicon-collapse-down
+    |  Show Jobs
+// show appointments for this customer
+button.btn.btn-info(ng-if='can_modify' 
+    ng-click='ais_collapsed = !ais_collapsed')
+    span.glyphicon.glyphicon-collapse-down
+    |  Show Appointments
+// only load data on expand
+.well(ng-show='is_collapsed' ng-if='is_collapsed')
+    cta-jobs(customer-id='customer.id')
+// only load data on expand
+.well(ng-show='ais_collapsed' ng-if='ais_collapsed')
+    cta-appointments(customer-id='customer.id')

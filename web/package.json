@@ -1,0 +1,28 @@
+{
+  "name": "web",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "express": "latest",
+    "serve-favicon": "latest",
+    "morgan": "latest",
+    "cookie-parser": "latest",
+    "body-parser": "latest",
+    "debug": "latest",
+    "jade": "latest",
+    "mongodb": "latest",
+    "mongoose": "latest",
+    "compression": "latest",
+    "passport": "latest",
+    "passport-google-oauth": "latest",
+    "async": "latest",
+    "mustache": "latest",
+    "latex": "latest",
+    "dateformat": "latest",
+    "connect-busboy": "latest",
+    "gridfs-stream": "latest"
+  }
+}

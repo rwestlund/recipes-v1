@@ -1,0 +1,27 @@
+div(ng-class="{'text-danger': type === 'error' }")
+    .modal-header
+        h3.modal-title {{ title }}
+
+    .modal-body
+        p {{ text }}
+        // display list if I have it, limit to 10 items
+        ul(ng-if='items.length')
+            li(ng-repeat='item in (items | limitTo:10)') {{ item }}
+            li(ng-if='items.length > 10') And {{ items.length - 10 }} more
+
+    // different footers by type
+    .modal-footer
+        .row(ng-if="type === 'prompt'")
+            .col-xs-6
+                button.btn.btn-primary.btn-block(ng-click='ok()')
+                    span.glyphicon.glyphicon-thumbs-up
+                    |  Yes
+            .col-xs-6
+                button.btn.btn-warning.btn-block(ng-click='cancel()')
+                    span.glyphicon.glyphicon-thumbs-down
+                    |  No
+        .row(ng-if="type === 'error'")
+            .col-xs-12
+                button.btn.btn-primary.btn-block(ng-click='ok()') Ok
+
+

@@ -1,0 +1,139 @@
+div(ng-init="can_modify = (window.localStorage.user_role === 'ADMIN' "
+    + "|| window.localStorage.user_role === 'SALESMAN')")
+.row
+    .col-md-6.col-xs-10
+        h3(style='margin-top:0;') Recipe Listing
+    .col-md-6.col-xs-2
+        button.btn.btn-info.pull-right(
+            ng-click='show_advanced = !show_advanced')
+            span.glyphicon.glyphicon-collapse-down
+            |  Options
+
+
+// advanced search collapsible div
+div(collapse='show_advanced')
+    .well
+        .row
+            .col-md-3.col-xs-12
+                h3.tight Actions
+                button.btn.btn-success.btn-block(ng-click='create_recipe()'
+                    ng-disabled="!(window.localStorage.user_role === 'ADMIN' "
+                    + "|| window.localStorage.user_role === 'SALESMAN')")
+                    span.glyphicon.glyphicon-plus
+                    |  Create Recipe
+
+                br
+                button.btn.btn-warning.btn-block(ng-click='show_help = !show_help')
+                    span.glyphicon.glyphicon-question-sign
+                    |  Show Help
+                
+                // help collapsible div
+                div(collapse='show_help')
+                    p This list shows all the recipes in the database.  You may filter results by typing in the search box.  It is not case sensitive.  The results will be updated as you type.
+                br
+
+            .col-md-9.col-xs-12
+                h3.tight Advanced Search
+                .row
+                    .col-md-3.col-xs-6
+                        // dropdown for results per page
+                        label Results per Page
+                        select.form-control(ng-model='items_per_page')
+                            option(ng-repeat='v in [10,20,50,500]') {{ v }}
+
+// search box
+input.form-control(type='search' placeholder='Search' ng-model='query')
+
+// filter results and save in 'filtered_customers', display count
+p {{ query ? "Filtering " + get_showing_text() + " by '" + query + "'" : "Showing " + get_showing_text() }}
+    | ({{  (filtered_recipes = (recipes | filter:query )).length + ' records' }})
+
+// this accordion group will have expandable list of customers
+accordion(close-others='false')
+    // grab previously filtered results and sort them
+    accordion-group.repeated-item(
+        ng-repeat='recipe in (filtered_recipes '
+            + '|startFrom: (current_page-1)*items_per_page '
+            + '|limitTo: items_per_page)')
+        accordion-heading {{ recipe.title || '(untitled)' }}
+            span.badge.pull-right {{ recipe.directions.length }}
+
+        // everything under here is the expand content
+
+        // put these in columns on medium devices, but stack on smaller ones
+        .row
+            // this col will hold misc actions
+            .col-md-3.col-xs-12.col-md-push-9
+                // make edit customer link look like a button
+                a.btn.btn-warning.btn-block(
+                    ng-href='/#/customers/{{customer.id}}')
+                    span.glyphicon.glyphicon-pencil
+                    |  Edit Customer
+                br
+                // new job
+                button.btn.btn-success.btn-block(type='button'
+                    ng-click='create_job(customer.id)'
+                    ng-disabled='!can_modify')
+                    span.glyphicon.glyphicon-plus
+                    |  Create Job
+                br
+                // new appointment
+                button.btn.btn-success.btn-block(type='button'
+                    ng-click='create_appointment(customer.id)'
+                    ng-disabled='!can_modify')
+                    span.glyphicon.glyphicon-plus
+                    |  Create Appointment
+                br
+            .col-md-3.col-xs-12.col-md-pull-3
+                .well
+                    h3.tight {{ customer.type }}
+                    // if not residential, display company info
+                    div(ng-if='customer.type != "Residential"')
+                        p.tight Office: {{ customer.companyName.office }}
+                        p Fax: {{ customer.companyName.cell }}
+
+                    p.tight Notes: {{ customer.notes }}
+
+            .col-md-3.col-xs-12.col-md-pull-3
+                .well(ng-repeat='name in customer.contacts')
+                    h3.tight Contact
+                    p.tight {{ name.fullName }}
+                    p.tight Cell: {{ name.cell }}
+                    p.tight Office / Home: {{ name.office }}
+                    p.tight Email: 
+                        a(ng-href='mailto:{{name.email}}') {{ name.email }}
+
+            .col-md-3.col-xs-12.col-md-pull-3
+                .well(ng-repeat='addr in customer.addresses | filter:{current:true}')
+                    h3.tight Address
+                    p.tight(ng-if='addr.label') Label: {{ addr.label }}
+                    p.tight {{ addr.number + ' ' + addr.street }}
+                    p.tight {{ addr.city + ' ' + addr.state + ', ' + addr.postal }}
+                    a.btn.btn-info.btn-block(ng-href='{{addr.url}}')
+                        span.glyphicon.glyphicon-road
+                        |  Google Maps
+            
+
+// this goes away once we have data
+p(ng-hide='recipes.$resolved') Loading data...
+
+// show helpful buttons
+div.text-center(ng-show='recipes.$resolved && filtered_recipes.length < items_per_page')
+    label Can't find it?
+    br
+    button.btn.btn-primary(
+        ng-click="inactive_tristate = 0; type_tristate = 0"
+        ) Search All Recipes
+
+div.text-center(ng-show='recipes.$resolved && filteredrecipes.length < items_per_page && can_modify')
+    label Not the droids you're looking for?  
+    br
+    button.btn.btn-success(ng-click='create_recipe()'
+        ng-disabled="!can_modify")
+        span.glyphicon.glyphicon-plus
+        |  Create Recipe
+
+
+pagination.repeated-item(ng-show='filtered_recipes.length'
+    total-items='filtered_recipes.length' ng-model='current_page'
+    items-per-page='items_per_page' max-size='4' rotate='false')

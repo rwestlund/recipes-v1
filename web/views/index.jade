@@ -1,0 +1,18 @@
+h3 Welcome!
+
+div(ng-if='!window.localStorage.user_token')
+    p Please sign in to access the CTA Database.
+    a.btn.btn-success(href='/auth/google')
+        span.glyphicon.glyphicon-log-in
+        |  Sign in with Google
+
+
+div(ng-if='window.localStorage.user_token')
+    
+
+    p This webserver provides a new, mobile-friendly interface to the company database.  It is designed from the ground up to be well-integrated with your mobile device, while maintaining usability from a normal desktop browser.
+
+    p If you have any trouble with the system, questions, or feature requests, you may contact Travis Jenkins, or email me directly at rwestlun@gmail.com.
+
+    p.tight Sincerely,
+    p.tight Randy Westlund

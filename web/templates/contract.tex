@@ -1,0 +1,237 @@
+\documentclass[11pt]{article}
+\usepackage{multicol}
+\usepackage{mdwlist}
+\usepackage{enumitem}
+\usepackage[left=0.3in,right=0.3in,top=0.3in,bottom=0.3in]{geometry}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{amsmath}
+\usepackage{enumitem}
+
+\setlength{\parindent}{0in}
+ 
+\begin{document}
+
+\newcommand{\ctaheader}{
+    \begin{tabular}{l>{\hfill}p{4.5in}}
+        \large\textbf{Charlotte Tent \& Awning Company}
+            & \Large\textbf{Proposal/Contract} \\
+        \textbf{5901 N Hills Circle} & \textbf{ {{get_proposal_date}} } \\
+        \textbf{Charlotte, NC 28213} & \small Pricing good for 30 days \\
+        \small{Phone: 704-921-8743} &  \small from date of this proposal \\
+        \small{Fax: 704-921-3034} &  \\
+        \small{www.CharlotteTentAndAwning.com} &
+            \small\textit{Generated \today} \\
+        & \\
+        \textbf{From:} {{salesRep.firstName}} {{salesRep.lastName}}
+            \small {{salesRep.phone}} &
+            {{#job.jobName}}\textbf{For:} ``{{job.jobName}}''{{/job.jobName}} \\
+        \small {{salesRep.email}} & \\
+    \end{tabular}
+% end top header with contact info
+}
+
+\newcommand{\ctafooter}{
+    \vfill
+    Employee:
+    \underset{\text{Name}}{\rule{6cm}{0.01cm}}
+    \hspace{0.5cm}
+    \underset{\text{Signature}}{\rule{6cm}{0.01cm}}
+    \hspace{0.5cm}
+    \underset{\text{Date}}{\rule{4cm}{0.01cm}}
+
+    \vspace{0.3cm}
+    Customer:
+    \underset{\text{Name}}{\rule{6cm}{0.01cm}}
+    \hspace{0.5cm}
+    \underset{\text{Signature}}{\rule{6cm}{0.01cm}}
+    \hspace{0.5cm}
+    \underset{\text{Date}}{\rule{4cm}{0.01cm}}
+}
+
+\newcommand{\ctadeposit}[2]{
+    \multicolumn{#2}{r}{} \\
+    \cline{#2-#2}
+    {{#job.depositRequired}}
+        \multicolumn{#1}{r|}{Deposit due at time of order} &
+            \textbf{\$\quad\hfill{{get_deposit_amount}}} \\
+        \cline{#2-#2}
+
+        \multicolumn{#1}{r|}{Balance due upon installation} &
+            \textbf{\$\quad\hfill{{get_balance_amount}}} \\
+    {{/job.depositRequired}}
+    {{^job.depositRequired}}
+        \multicolumn{#1}{r|}{Total Due} &
+    \textbf{\$\quad\hfill{{get_total_price_with_tax}}} &
+    {{/job.depositRequired}}
+    \cline{#2-#2}
+}
+
+% actual stuff starts here ******
+
+\ctaheader
+
+% three part top header
+\setlength{\columnseprule}{0.3pt}
+\begin{multicols}{3}
+  \centerline{\textbf{Job Contact}}
+  \vspace{1em}
+  \begin{tabularx}{0.9\linewidth}{rX}
+  {{#job.contactName}}
+    Name: & {{name}} \\
+    Office: & {{office}} \\
+    Cell: & {{cell}} \\
+    Email: & {{email}} \\
+  {{/job.contactName}}
+  \\
+
+  \end{tabularx}
+  \vfill
+  \columnbreak
+
+  \centerline{\textbf{Invoice To}}
+  \vspace{1em}
+  \begin{tabularx}{0.9\linewidth}{rX}
+    {{#isResidential}}
+      {{#job.customerName}}
+        Name: & {{name}} \\
+        Office: & {{office}} \\
+        Cell: & {{cell}} \\
+        Email: & {{email}} \\
+      {{/job.customerName}}
+    {{/isResidential}}
+    {{^isResidential}}
+      & {{customer.companyName.name}} \\
+      Office: & {{customer.companyName.office}} \\
+      Fax: & {{customer.companyName.fax}} \\
+    {{/isResidential}}
+  \end{tabularx}
+
+  \vspace{1em}
+  {{#job.billingAddress}}
+  \centerline{ {{number}} {{street}} }
+  \centerline{ {{city}}{{#city}},{{/city}} {{state}} {{postal}} }
+  {{/job.billingAddress}}
+  \vfill
+  \columnbreak
+
+  \centerline{\textbf{Location of Install}}
+  \vspace{1em}
+  {{#job.installationAddress}}
+  \centerline{ {{number}} {{street}} }
+  \centerline{ {{city}}{{#city}},{{/city}} {{state}} {{postal}} }
+  {{/job.installationAddress}}
+  \vspace{1em}
+
+  \centerline{\textbf{Superintendent}}
+  \begin{tabularx}{0.9\linewidth}{rX}
+  {{#job.superintendentName}}
+    Name: & {{name}} \\
+    Office: & {{office}} \\
+    Cell: & {{cell}} \\
+    Email: & {{email}} \\
+  {{/job.superintendentName}}
+  \end{tabularx}
+  \vfill
+\end{multicols}
+
+\vspace{1em}
+
+% 
+% start itemization of job items
+
+% if we want to show breakdown, use the detailed version
+{{#job.showBreakdown}}
+    \begin{tabularx}{0.95\linewidth}{|r|X|r|r|r|}
+        \multicolumn{1}{c}{\textbf{Qty}} &
+            \multicolumn{1}{c}{\textbf{Description}} &
+            \multicolumn{1}{c}{\textbf{Materials}} &
+            \multicolumn{1}{c}{\textbf{Labor}} &
+            \multicolumn{1}{c}{\textbf{Total}} \\
+        \hline
+        % job items
+        {{#job.jobItems}}
+            {{quantity}} & {{_summary}} & \$\quad\hfill{{get_materials_cost}} &
+                \$\quad\hfill{{get_labor_cost}} & \$\quad\hfill{{get_price}} \\
+            & & & & \\
+        {{/job.jobItems}}
+        \hline
+        % totals
+        \multicolumn{2}{r|}{Subtotals} &
+            \$\quad\hfill{{get_total_materials_cost}}
+            & \$\quad\hfill{{get_total_labor_cost}} &
+            \$\quad\hfill{{get_total_price}} \\
+
+            \multicolumn{2}{r|}{\small Make all checks payable to
+                \hfill\normalsize Tax} & \$\quad\hfill{{get_materials_tax}} &
+            \$\quad\hfill0.00 & \$\quad\hfill{{get_materials_tax}} \\
+
+            \multicolumn{2}{r|}{\small Charlotte Tent \& Awning Company
+                \hfill\normalsize Totals} &
+            \$\quad\hfill{{get_total_materials_cost_with_tax}} &
+            \$\quad\hfill{{get_total_labor_cost}} &
+            \textbf{\$\quad\hfill{{get_total_price_with_tax}}} \\
+
+        \cline{3-5}
+        \ctadeposit{4}{5}
+    \end{tabularx}
+{{/job.showBreakdown}}
+
+% wlse if we want to hide the breakdown, use the simple versions
+{{^job.showBreakdown}}
+    \begin{tabularx}{0.95\linewidth}{|r|Xr|}
+        \multicolumn{1}{c}{\textbf{Qty}} &
+        \multicolumn{1}{c}{\textbf{Description}} &
+        \multicolumn{1}{c}{} \\
+        \hline
+        {{#job.jobItems}}
+            {{quantity}} & {{_summary}} & \\
+             & & \\
+        {{/job.jobItems}}
+        \hline
+
+        \multicolumn{2}{r|}{Subtotal} & \$\quad\hfill{{get_total_price}} \\
+
+        \multicolumn{2}{r|}{\small Make all checks payable to
+            \hfill\normalsize Tax} & \$\quad\hfill{{get_materials_tax}} \\
+
+        \multicolumn{2}{r|}{\small Charlotte Tent \& Awning Company
+            \hfill\normalsize Total} &
+            \textbf{\$\quad\hfill{{get_total_price_with_tax}}} \\
+
+        \cline{3-3}
+        \ctadeposit{2}{3}
+
+    \end{tabularx}
+{{/job.showBreakdown}}
+
+{{#job.proposalNotes}}
+    \textbf{Notes} \\
+    {{job.proposalNotes}}
+{{/job.proposalNotes}}
+\ctafooter
+
+% start second page with contract terms
+\newpage
+
+\ctaheader
+
+\vspace{3em}
+
+\centerline{\Large\textbf{Terms of Contract}}
+\begin{enumerate}[rightmargin=0.5in]
+    \item Charlotte Tent \& Awning Company shall herein be referred to as ``the company.''
+    \item This PROPOSAL shall become a valid CONTRACT upon signature of both parties involved.
+    \item This contract is not subject to cancellation after it is accepted by the company.
+    \item No agreement or stipulation either verbal or implied save those mentioned on this contract will be recognized except those included as part of a customer's (contractor) contract. This contract shall be accepted as an addendum to any such contract provided by customer.
+    \item Should a door, sign, light fixture or any other addition be made or erected after this contract is signed by the customer, which will interfere with the installation or proper working of the awning(s) described herein, any necessary change or alterations in the said awning(s) will be made at the expense of the customer.
+    \item That said awning(s) and merchandise shall remain the property of the company until purchase price thereof has been fully paid. The company reserves the right to reposes said awning(s) and merchandise and may at their discretion add charges for take down and reinstallation.
+    \item This contract shall not bind the company until signed and accepted by its duly authorized officer.
+    \item Receipt of customer's Purchase Order, Check, Credit Card information or Cash will be binding as acceptance of all terms of this contract.
+    \item Balance due is payable upon completion of installation.
+    \item Interest will be charged on past due accounts at a rate to be determined by the company.
+\end{enumerate}
+
+\ctafooter
+
+\end{document}

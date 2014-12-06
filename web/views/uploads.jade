@@ -1,0 +1,93 @@
+// heading will be on same row as alerts
+// set up can_modify so I can disable everything for unprivileged users
+.row(ng-init="can_modify = (window.localStorage.user_role === 'ADMIN' "
+    + "|| window.localStorage.user_role === 'SALESMAN')")
+
+    .col-md-6.col-xs-12
+        h3.tight {{ type === 'job' ? job._jobString : 'Appointment with ' + appointment.contact[0].fullName }}
+    .col-md-6.col-xs-12(ng-class="{ 'vis-hidden': !is_modified}")
+        alert.very-tight(type='{{alert.type}}') {{ alert.msg }}
+
+.row
+    .col-md-4.col-xs-12
+        button.btn.btn-success.btn-block(type='button'
+            ng-disabled='!is_modified || !can_modify'
+            ng-click='save_fileinfo()')
+            span.glyphicon.glyphicon-save
+            |  Save changes
+        br
+    .col-md-2.col-xs-6
+        button.btn.btn-info.btn-block(type='button' ng-click='route.reload()')
+            span.glyphicon.glyphicon-refresh
+            |  Refresh
+        br
+    .col-md-2.col-xs-6
+        a.btn.btn-warning.btn-block(ng-if="type === 'job'"
+            ng-href='/#/jobs/{{job.id}}')
+            span.glyphicon.glyphicon-pencil
+            |  Edit Job
+        a.btn.btn-warning.btn-block(ng-if="type === 'appointment'"
+            ng-href='/#/appointments/{{appointment.id}}')
+            span.glyphicon.glyphicon-pencil
+            |  Edit Appointment
+        br
+
+.well(nv-file-drop uploader='uploader' nv-file-over)
+    h3.tight Uploaded Files
+    .table-responsive
+        table.table
+            thead
+                tr
+                    th File name
+                    th.hidden-xs Type
+                    th Size
+                    th Description
+                    th.hidden-xs Upload date
+                    th Download
+                    th Delete
+            tbody
+                tr(ng-repeat='file in files')
+                    td {{ file.filename }}
+                    td.hidden-xs {{ file.contentType }}
+                    td {{ filesize(file.length) }}
+                    td: input.form-control(ng-model='file.metadata.description'
+                        placeholder='enter a description' ng-disabled='!can_modify')
+                    td.hidden-xs {{ file.uploadDate | date:'medium' }}
+                    td: a.btn.btn-success(ng-href='/files/{{file.id}}')
+                        span.glyphicon.glyphicon-cloud-download
+
+                    td: button.btn.btn-danger(ng-click='delete_file(file.id)'
+                        ng-disabled='!can_modify')
+                        span.glyphicon.glyphicon-trash
+
+                tr(ng-repeat='item in uploader.queue')
+                    td {{ item._file.name }}
+                    td {{ item._file.type }}
+                    td {{ filesize(item._file.size) }}
+                    td(colspan='3')
+                        progressbar(ng-hide='item.isError' animate='true'
+                            value='item.progress' type='success'
+                            ) {{ item.progress }} %
+                        p.text-danger(ng-show='item.isError'
+                            ) Error uploading! Remove and retry
+
+                    td: button.btn.btn-danger(ng-click='item.remove()')
+                        span.glyphicon.glyphicon-remove
+
+                        
+.row
+    .col-md-6.col-xs-12
+        .well
+            h3.tight Choose Files
+            input(type='file' nv-file-select uploader='uploader' multiple
+                ng-disabled='!can_modify')
+
+    .col-md-6.col-xs-12
+        .well
+            h3.tight Info
+            p Here you may upload files to the database, attaching them to a job or appointment record.  You may choose multiple files at once with Choose Files, or drag and drop them in the Uploaded Files box.
+
+            p You may have multiple files with identical names (e.g. if you want to upload an updated version of a contract, you can differentiate the two versions with the description field, or by upload date).
+
+            p The only time you need to click 'Save Changes' is after modifying file descriptions.  Uploading or deleting a file takes effect immediately.
+

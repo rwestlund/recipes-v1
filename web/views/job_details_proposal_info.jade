@@ -1,0 +1,64 @@
+.row
+    .col-md-4.col-xs-12
+        form.well(name='tax_info')
+            h3.tight Proposal Settings
+            // issue date
+            .form-group
+                label Issue Date
+                .input-group
+                    input.form-control(datepicker-popup='shortDate'
+                        ng-model='job.proposalDate' ng-required='true'
+                        is-open='cal.is_open2')
+                    span.input-group-btn
+                        button.btn.btn-default(
+                            ng-click='cal.is_open2 = !cal.is_open2; open_cal($event)')
+                            span.glyphicon.glyphicon-calendar
+            // tax rate
+            .form-group
+                label Tax Rate
+                input.form-control(type='number' min='0' max='1'
+                    ng-model='job.taxRate' name='tax_rate'
+                    ng-disabled='!can_modify')
+                p.help-block(ng-show='tax_info.tax_rate.$invalid'
+                    ) Not a valid tax rate
+            // show tax breakdown
+            .form-group
+                label Show Price Breakdown
+                .btn-group.btn-group-justified
+                    label.btn.btn-primary(ng-model='job.showBreakdown'
+                        btn-radio='true') Yes
+                    label.btn.btn-primary(ng-model='job.showBreakdown'
+                        btn-radio='false') No
+            // 50% deposit
+            .form-group
+                label 50% Deposit Required
+                .btn-group.btn-group-justified
+                    label.btn.btn-primary(ng-model='job.depositRequired'
+                        btn-radio='true') Yes
+                    label.btn.btn-primary(ng-model='job.depositRequired'
+                        btn-radio='false') No
+
+    .col-md-4.col-xs-12
+        .well
+            h3.tight Info
+            label Total with Tax: {{ get_total_price() | currency }}
+
+        form.well
+            h3.tight Notes
+            .form-group
+                textarea.form-control(rows='3' ng-model='job.proposalNotes')
+                p.help-block This will be displayed on the contract
+
+    .col-md-4.col-xs-12
+        .well
+            h3.tight Actions
+            a.btn.btn-success.btn-block(
+                ng-href='/jobs/{{job.id}}/contract.pdf')
+                span.glyphicon.glyphicon-list-alt
+                |  Generate Contract
+            p.help-block Remember to save first!
+
+
+
+
+
