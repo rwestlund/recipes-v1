@@ -16,6 +16,7 @@ var services = angular.module('services', [ 'ngResource' ])
     function($resource) {
         return $resource('/users/:user_id', {}, {
             query: { method: 'GET', isArray: true },
+            findById: { method: 'GET' },
             update: { method: 'PUT', isArray: true },
             delete: { method: 'DELETE' },
             create: { method: 'POST' }

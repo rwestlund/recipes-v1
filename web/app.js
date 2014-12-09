@@ -86,12 +86,6 @@ app.use(passport.initialize());
 
 // connection setup
 app.use(function(req, res, next) {
-    // enforce https
-    if (!req.secure) {
-        console.log('redirecting to https');
-        return res.redirect('https://' + req.headers.host + req.url);
-    }
-
     // get configs from DB here
     // pass gridfs ref
     req.gfs = Grid(db.db, mongoose.mongo);
@@ -132,9 +126,7 @@ passport.use(new GoogleStrategy(
 
 // when users hit this route, redirect to google for login
 app.get('/auth/google', passport.authenticate('google',
-    //{ scope: [ 'profile', 'email', 'https://www.googleapis.com/auth/calendar' ],
     { scope: [ 'profile', 'email'] }
-        //accessType: 'offline' }
 ));
 
 app.get('/oauth2callback', function(req, res, next) {
@@ -150,7 +142,7 @@ app.get('/oauth2callback', function(req, res, next) {
     })(req, res, next);
 });
 
-// make sure token is in DB
+// set req.user if token, otherwise allow through
 function ensure_auth(req, res, next) {
     // get token from headers
     var token = req.headers.authorization;
@@ -158,7 +150,7 @@ function ensure_auth(req, res, next) {
     if (!token) token = req.cookies.authorization;
     if (!token) {
         console.log('no token present');
-        return res.status(401).end();
+        return next();
     }
     // find user by token
     User.findOneAndUpdate({ 'token.token': token }, { lastlog: new Date() },
@@ -166,7 +158,9 @@ function ensure_auth(req, res, next) {
             if (err) return next(err);
             if (!user) {
                 console.log("token doesn't match a user");
-                return res.status(401).end();
+                // outdated token, let them know now
+                if (token) return res.status(401).end();
+                return next();
             }
             console.log(user.name, 'has good auth');
             req.user = user;
@@ -182,7 +176,7 @@ function ensure_auth(req, res, next) {
 app.use('/', routes);
 app.use('/templates', templates);
 
-// YOU SHALL NOT PASS! (without an auth token)
+// look for auth token
 app.use('*', ensure_auth);
 
 app.use('/users', users);

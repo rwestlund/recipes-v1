@@ -5,11 +5,7 @@ var User = require('../models/user');
 
 // GET users listing
 router.get('/', function(req, res, next) {
-    // access restrictions
-    if (req.user.role !== 'ADMIN') {
-        console.log(req.user.name, 'may not view users');
-        return res.send(403);
-    }
+    // open to anyone, be careful about what to send
     console.log('got request for users listing');
     User.find(function(err, users) {
         if (err) return next(err);
@@ -18,13 +14,25 @@ router.get('/', function(req, res, next) {
      });
 });
 
+// GET a user
+router.get('/:user_id', function(req, res, next) {
+    // open to anyone, be careful about what to send
+    console.log('got request for user', req.params.user_id);
+    User.findById(req.params.user_id, function(err, user) {
+        if (err) return next(err);
+        if (!user) return res.status(404).end();
+        res.send(user);
+     });
+});
+
 
 // POST a new user
 router.post('/', function(req, res, next) {
     // access restrictions
+    if (!req.user) return res.status(401).end();
     if (req.user.role !== 'ADMIN') {
         console.log(req.user.name, 'may not create users');
-        return res.send(403);
+        return res.status(403).end();
     }
 
     console.log('got request for new user');
@@ -45,6 +53,7 @@ router.post('/', function(req, res, next) {
 // PUT user list
 router.put('/', function(req, res, next) {
     // access restrictions
+    if (!req.user) return res.status(401).end();
     if (req.user.role !== 'ADMIN') {
         console.log(req.user.name, 'may not modify users');
         return res.send(403);
@@ -81,9 +90,10 @@ router.put('/', function(req, res, next) {
 // DELETE USER
 router.delete('/:user_id', function(req, res, next) {
     // access restrictions
+    if (!req.user) return res.status(401).end();
     if (req.user.role !== 'ADMIN') {
         console.log(req.user.name, 'may not delete users');
-        return res.send(403);
+        return res.status(403).end()
     }
 
     console.log('got request to delete user', req.params.user_id);

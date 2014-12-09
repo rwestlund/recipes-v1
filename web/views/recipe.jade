@@ -1,0 +1,213 @@
+// heading will be on same row as alerts
+.row
+    .col-md-6.col-xs-12
+        h3.tight {{ recipe.title }} 
+            small.text-muted version {{ recipe.__v || 0 }}
+    .col-md-6.col-xs-12(ng-class="{ 'vis-hidden': !is_modified}")
+        alert.very-tight(type='{{alert.type}}') {{ alert.msg }}
+
+.row
+    .col-md-3.col-xs-12
+        button.btn.btn-success.btn-block(type='button'
+            ng-click='save_changes()'
+            ng-disabled='!is_modified || !can_modify')
+            span.glyphicon.glyphicon-save
+            |  Save Changes
+        br
+    .col-md-3.col-xs-12
+        button.btn.btn-warning.btn-block(type='button'
+            ng-click='edit_mode = !edit_mode'
+            ng-disabled='!can_modify')
+            span.glyphicon.glyphicon-pencil
+            |  Toggle Edit Mode
+        br
+    .col-md-3.col-xs-6
+        button.btn.btn-danger.btn-block(type='button' ng-disabled='!can_modify'
+            ng-click='open_delete_modal()')
+            span.glyphicon.glyphicon-trash
+            |  Delete Recipe
+        br
+    .col-md-3.col-xs-6
+        button.btn.btn-info.btn-block(type='button' ng-click='refresh()')
+            span.glyphicon.glyphicon-refresh
+            |  Refresh
+        br
+
+// display form
+.row(ng-if='!edit_mode')
+    .col-md-3.col-xs-12
+        .well
+            h3.tight Summary
+            p.tight {{ recipe.summary }}
+        .well
+            h3.tight Ingredients
+            ul
+                li(ng-repeat='item in recipe.ingredients track by $index'
+                    ) {{ item }}
+
+    .col-md-3.col-xs-12
+        .well
+            h3.tight Directions
+            ol
+                li(ng-repeat='item in recipe.directions track by $index'
+                    ) {{ item }}
+
+    .col-md-3.col-xs-12
+        .well
+            h3.tight Info
+            dl
+                dt Amount
+                dd {{ recipe.amount }}
+                dt Oven Temp
+                dd {{ recipe.oven }}
+                dt Time
+                dd {{ recipe.time }}
+                dt Source
+                dd {{ recipe.source }}
+                dt Notes
+                dd {{ recipe.notes }}
+
+    // list of linked recipes
+    .col-md-3.col-xs-12
+        .well
+            h3.tight Linked Recipes
+            // empty div for formatting
+            .form-group
+            .form-group(ng-repeat='id in recipe.linked')
+                a.btn.btn-primary.btn-block(
+                    ng-href='/#/recipes/{{id}}')
+                    span.glyphicon.glyphicon-share-alt
+                    |  {{ get_recipe_name(id) }}
+
+// edit form
+.row(ng-if='edit_mode')
+    // start recipe ingredients col
+    .col-md-4.col-xs-12
+        form.well(role='form')
+            h3.tight Ingredients
+            fieldset(ng-disabled='!can_modify')
+
+                // list of ingredients with buttons to remove
+                // we must track by index and bind to parent object
+                .form-group(
+                        ng-repeat='item in recipe.ingredients track by $index')
+                    .input-group
+                        input.form-control(type='text' name='' autofocus
+                            ng-model='recipe.ingredients[$index]'
+                            ng-disabled='!can_modify')
+                        span.input-group-btn
+                            button.btn.btn-danger(
+                                ng-click='recipe.ingredients.splice($index,1)')
+                                span.glyphicon.glyphicon-remove
+
+                button.btn.btn-success.btn-block(ng-disabled='!can_modify'
+                    ng-click='recipe.ingredients.push("")')
+                    span.glyphicon.glyphicon-plus
+                    |  Add Ingredient
+
+        // recipe tags
+        form.well(role='form')
+            h3.tight Tags
+            fieldset(ng-disabled='!can_modify')
+                // list of tags with buttons to remove
+                // we must track by index and bind to parent object
+                .form-group(
+                        ng-repeat='item in recipe.tags track by $index')
+                    .input-group
+                        input.form-control(type='text' name='' autofocus
+                            ng-model='recipe.tags[$index]'
+                            typeahead='tag for tag in tags | filter:$viewValue | limitTo:8'
+                            ng-disabled='!can_modify')
+                        span.input-group-btn
+                            button.btn.btn-danger(
+                                ng-click='recipe.tags.splice($index,1)')
+                                span.glyphicon.glyphicon-remove
+
+                button.btn.btn-success.btn-block(ng-disabled='!can_modify'
+                    ng-click='recipe.tags.push("")')
+                    span.glyphicon.glyphicon-plus
+                    |  Add Tag
+                    
+    // start directions col
+    .col-md-4.col-xs-12
+        form.well(role='form')
+            h3.tight Directions
+            fieldset(ng-disabled='!can_modify')
+                // list of directions with buttons to remove
+                // we must track by index and bind to parent object
+                .form-group(
+                        ng-repeat='item in recipe.directions track by $index')
+                    .input-group
+                        label Step {{ $index + 1 }}
+                        textarea.form-control(rows='3' type='text' name=''
+                            ng-model='recipe.directions[$index]' autofocus
+                            ng-disabled='!can_modify')
+                        span.input-group-btn
+                            button.btn.btn-danger(
+                                ng-click='recipe.directions.splice($index,1)')
+                                span.glyphicon.glyphicon-remove
+
+                button.btn.btn-success.btn-block(ng-disabled='!can_modify'
+                    ng-click='recipe.directions.push("")')
+                    span.glyphicon.glyphicon-plus
+                    |  Add Step
+                
+    // start info col
+    .col-md-4.col-xs-12
+        form.well
+            h3.tight Info
+            fieldset(ng-disabled='!can_modify')
+                .form-group
+                    label Created By
+                    p.tight {{ author.name }}
+                .form-group
+                    label Title
+                    input.form-control(type='text' ng-model='recipe.title')
+                .form-group
+                    label Summary
+                    input.form-control(type='text' ng-model='recipe.summary')
+                .form-group
+                    label Amount
+                    input.form-control(type='text' ng-model='recipe.amount')
+                .form-group
+                    label Oven Temp
+                    input.form-control(type='text' ng-model='recipe.oven')
+                .form-group
+                    label Time Required
+                    input.form-control(type='text' ng-model='recipe.time')
+                .form-group
+                    label Source
+                    input.form-control(type='text' ng-model='recipe.source')
+                .form-group
+                    label Notes
+                    textarea.form-control(rows='3' type='text'
+                        ng-model='recipe.notes')
+
+        // linked recipes
+        form.well
+            h3.tight Linked Recipes
+            fieldset(ng-disabled='!can_modify')
+                // highlight error if not a valid recipe
+                .form-group(ng-repeat='item in recipe.linked track by $index')
+                    .row
+                        .col-xs-10
+                            a.btn.btn-primary.btn-block(ng-href='/#/recipes/{{item}}')
+                                span.glyphicon.glyphicon-share-alt
+                                |  {{ get_recipe_name(item) }}
+                        .col-xs-2
+                            button.btn.btn-danger.btn-block(
+                                ng-click='recipe.linked.splice($index,1)')
+                                span.glyphicon.glyphicon-remove
+
+                // form to add linked recipes
+                .form-group
+                    label Link a Recipe
+                    input.form-control(type='text' name=''
+                        ng-model='linked_recipe'
+                        placeholder='type recipe name and select'
+                        typeahead-editable='false'
+                        typeahead-on-select='linked_recipe_select($item, $model, $label)'
+                        typeahead='recipe as recipe.title for recipe in recipes | filter:{title:$viewValue} | limitTo:8'
+                        ng-disabled='!can_modify')
+                    p.help-block Link relevant recipes to this one, e.g. icing or sauce
+

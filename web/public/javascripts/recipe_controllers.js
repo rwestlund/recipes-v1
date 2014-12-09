@@ -1,11 +1,30 @@
 var recipe_controllers = angular.module('recipe_controllers', [])
 
-// controller for customer listing
+// controller for recipe listing
 .controller('recipes_ctrl',
-    [ '$scope', 'Recipe',
-    function($scope, Recipe) {
+    [ '$scope', '$filter', '$window', 'Recipe',
+    function($scope, $filter, $window, Recipe) {
+
+        // determine access permissions
+        $scope.can_modify = ($window.localStorage.user_role === 'ADMIN'
+            || $window.localStorage.user_role === 'MODERATOR'
+            || $window.localStorage.user_role === 'USER');
+
+        $scope.query;
+        $scope.selected_tags = [];
+
         // populate recipe list
-        $scope.recipes = Recipe.query();
+        $scope.recipes = Recipe.query(function(recipes) {
+            // build list of all tags
+            $scope.tags = [];
+            recipes.forEach(function(recipe) {
+                recipe.tags.forEach(function(tag) {
+                    if ($scope.tags.indexOf(tag) === -1)
+                        $scope.tags.push(tag);
+                });
+            });
+            $scope.tags.sort();
+        });
         // set expand buttons to hidden
         $scope.show_help = true;
         $scope.show_advanced = true;
@@ -15,29 +34,59 @@ var recipe_controllers = angular.module('recipe_controllers', [])
 
         // get dynamic search display text
         $scope.get_showing_text = function() {
-            return 'all recipes';
+            if (!$scope.selected_tags.length) return 'all recipes';
+            return $scope.selected_tags.join(', ');
+        };
+        
+        // get recipe name from id
+        $scope.get_recipe_name = function(id) {
+            if (!id || !$scope.recipes.$resolved) return;
+            return $scope.recipes.filter(function(recipe) {
+                return recipe.id === id;
+            })[0].title;
+        }
+
+        $scope.get_tags = function(recipe) {
+            if (!recipe.tags.length) return '';
+            var text = '';
+            recipe.tags.forEach(function(tag) {
+                text += tag + ', ';
+            });
+            return text.slice(0,text.length-2);
         };
 
     }]
 )
 
-// controller for customer details page
+// controller for recipe details page
 .controller('recipe_ctrl',
-    [ '$scope', '$route', '$routeParams', '$modal', 'Model', 'Recipe',
-    function($scope, $route, $routeParams, $modal, Model, Recipe) {
+    [ '$scope', '$route', '$routeParams', '$modal', '$window', 'Model',
+    'Recipe', 'User',
+    function($scope, $route, $routeParams, $modal, $window, Model,
+    Recipe, User) {
+        // determine access permissions -- more below
+        $scope.can_modify = ($window.localStorage.user_role === 'ADMIN'
+            || $window.localStorage.user_role === 'MODERATOR');
 
-        // tracks whether or not a customer is modified
+        // tracks whether or not a recipe is modified
         $scope.is_modified = false;
-        // when customer refreshed from server, prevent recipe watch
+        // when recipe refreshed from server, prevent recipe watch
         $scope.prevent_watch = false;
         // holds whatever alert we want to show, display if msg is truthy
         $scope.alert = { type: 'warning', msg: 'You have unsaved changes' };
 
-        // get customer info and attach callback for customer changes
+        // get recipe info and attach callback for recipe changes
         $scope.recipe =
             Recipe.findById({recipe_id: $routeParams.recipe_id},
-            function() {
-                // executed when customer is modified
+            function(recipe) {
+                // if the user owns this recipe
+                if ($window.localStorage.user_id === recipe.authorId)
+                    $scope.can_modify = true;
+
+                // get author
+                $scope.author = User.findById({ user_id: recipe.authorId });
+
+                // executed when recipe is modified
                 $scope.$watch('recipe', function(n, o) {
                     if (n === o) return;
                     // if we've just updated from server, ignore change
@@ -47,6 +96,34 @@ var recipe_controllers = angular.module('recipe_controllers', [])
                 }, true);
             }
         );
+
+        // get all recipes
+        $scope.recipes = Recipe.query(function(recipes) {
+            // build list of all tags
+            $scope.tags = [];
+            recipes.forEach(function(recipe) {
+                recipe.tags.forEach(function(tag) {
+                    if ($scope.tags.indexOf(tag) === -1)
+                        $scope.tags.push(tag);
+                });
+            });
+            $scope.tags.sort();
+
+        });
+        // callback for when a new recipe is linked
+        $scope.linked_recipe_select = function(item, model, label) {
+            // add it to list
+            $scope.recipe.linked.push(item.id);
+            $scope.linked_recipe = null;
+        };
+
+        // get recipe name from id
+        $scope.get_recipe_name = function(id) {
+            if (!id || !$scope.recipes.$resolved) return;
+            return $scope.recipes.filter(function(recipe) {
+                return recipe.id === id;
+            })[0].title;
+        }
 
 
         $scope.delete_recipe = function() {
@@ -90,7 +167,7 @@ var recipe_controllers = angular.module('recipe_controllers', [])
         };
 
 
-        // PUT customer
+        // PUT recipe
         $scope.save_changes = function() {
             console.log('saving changes');
             Recipe.update($scope.recipe, function(recipe) {
@@ -100,7 +177,7 @@ var recipe_controllers = angular.module('recipe_controllers', [])
                 // clear modified flag
                 $scope.is_modified = false;
 
-                // prevent the customer watch from firing this cycle
+                // prevent the recipe watch from firing this cycle
                 $scope.prevent_watch = true;
                 setTimeout(function() { $scope.prevent_watch = false; },0);
             });

@@ -60,6 +60,9 @@ var misc_controllers = angular.module('misc_controllers', [])
             );
          });
 
+        // referenced by the admin page
+        $scope.user_roles = [ 'ADMIN', 'MODERATOR', 'USER', 'GUEST' ];
+
         // follow external link in new window
         $scope.navigate = function(dest) {
             $window.open(dest);
@@ -96,6 +99,7 @@ var misc_controllers = angular.module('misc_controllers', [])
             $http.delete('/tokens').then(function(data) {
                 delete $window.localStorage.user_name;
                 delete $window.localStorage.user_role;
+                delete $window.localStorage.user_id;
                 delete $window.localStorage.user_token;
                 ipCookie.remove('authorization');
                 $scope.go('/');

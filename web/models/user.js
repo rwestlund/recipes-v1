@@ -5,6 +5,7 @@ var my_string = { type: String, default: '', trim: true };
 var user_schema = new mongoose.Schema({
     name: my_string,
     email: { type: String, default: '', trim: true, required: true },
+    // GUEST, USER, MODERATOR, ADMIN
     role: { type: String, default: 'GUEST', trim: true, required: true },
     lastlog: { type: Date },
     token: {

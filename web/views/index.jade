@@ -1,18 +1,30 @@
-h3 Welcome!
-
-div(ng-if='!window.localStorage.user_token')
-    p Please sign in to access the CTA Database.
+.well(ng-if='!window.localStorage.user_token')
+    h3.tight Not Signed In
+    p Please sign in to add or edit recipes.
     a.btn.btn-success(href='/auth/google')
         span.glyphicon.glyphicon-log-in
         |  Sign in with Google
 
 
-div(ng-if='window.localStorage.user_token')
-    
+.row
+    .col-md-6.col-xs.12
+        .well
+            h3.tight Welcome!
+            p Welcome to my recipe database!  This started as a project just for me, because I got tired of keeping track of a bunch of links to other websites with inconsistent formatting, changing links, etc.
 
-    p This webserver provides a new, mobile-friendly interface to the company database.  It is designed from the ground up to be well-integrated with your mobile device, while maintaining usability from a normal desktop browser.
+            p I decided to improve it and open it to others.  Anyone can access information here, and family and friends will have the ability to log in and add recipes.
 
-    p If you have any trouble with the system, questions, or feature requests, you may contact Travis Jenkins, or email me directly at rwestlun@gmail.com.
+            p Note that this is running off one of my own recycled servers, and may not have 100% uptime.  Let me know if it goes down.
 
-    p.tight Sincerely,
-    p.tight Randy Westlund
+            p
+                | If you don't have an account, I'll add you if one of my friends will vouch for you.  If you have any technical issues or suggestions, contact me at 
+                | <a href="mailto:rwestlun+recipes@gmail.com">rwestlun+recipes@gmail.com</a>.
+
+    .col-md-6.col-xs-12
+        .well
+            h3.tight Rules
+            ol
+                li Be respectful.
+                li Follow consistent formatting and capitalization.
+                li You may only edit the recipes you've created.
+                li Where possible, link back to the original source.

@@ -20,24 +20,9 @@
                     td {{ user.name ? user.name : '(provided by Google on first log in)' }}
                     td: input.form-control(ng-model='user.email')
 
-                    td: .btn-group(dropdown is-open='is_open')
-                        button.btn.dropdown-toggle( ng-class="{ "
-                            + "'btn-danger': user.role === 'ADMIN', "
-                            + "'btn-warning': user.role === 'SALESMAN', "
-                            + "'btn-primary': user.role === 'USER', "
-                            + "'btn-info': user.role === 'GUEST' }"
-                            ) {{ user.role }} 
-                            span.caret
+                    td: select.form-control(ng-model='user.role'
+                        ng-options='role for role in user_roles')
 
-                        ul.dropdown-menu(role='menu')
-                            li: a(ng-click="user.role='ADMIN'; is_open = false"
-                                ) ADMIN
-                            li: a(ng-click="user.role='SALESMAN'; is_open = false"
-                                ) SALESMAN
-                            li: a(ng-click="user.role='USER'; is_open = false"
-                                ) USER
-                            li: a(ng-click="user.role='GUEST'; is_open = false"
-                                ) GUEST
                     td {{ user.lastlog | date:'medium' }}
                     td {{ user.timestamp | date:'medium' }}
                     td: button.btn.btn-sm.btn-danger(ng-click="open_delete_user_modal(user)"): span.glyphicon.glyphicon-trash
@@ -57,24 +42,8 @@
                         .col-xs-6
                             .form-group
                                 label Role
-                                br
-                                .btn-group(dropdown is-open='status.is_open')
-                                    button.btn.dropdown-toggle(ng-class="{ "
-                                        + "'btn-danger': new_user.role === 'ADMIN', "
-                                        + "'btn-warning': new_user.role === 'SALESMAN', "
-                                        + "'btn-primary': new_user.role === 'USER', "
-                                        + "'btn-info': new_user.role === 'GUEST' }"
-                                        ) {{ new_user.role }} 
-                                        span.caret
-                                    ul.dropdown-menu(role='menu')
-                                        li: a(ng-click="new_user.role='ADMIN'; "
-                                            + "status.is_open = false") ADMIN
-                                        li: a(ng-click="new_user.role='SALESMAN'; "
-                                            + "status.is_open = false") SALESMAN
-                                        li: a(ng-click="new_user.role='USER'; "
-                                            + "status.is_open = false") USER
-                                        li: a(ng-click="new_user.role='GUEST'; "
-                                            + "status.is_open = false") GUEST
+                                select.form-control(ng-model='new_user.role'
+                                    ng-options='role for role in user_roles')
                         .col-xs-6
                             .form-group
                                 // invisible label to make buttons line up
@@ -100,11 +69,11 @@
             dl
                 dt ADMIN
                     dd A superuser.  Only ADMINS can manage users and system configuration.
-                dt SALESMAN
-                    dd Can create, modify, and delete customers and jobs, as well as see all pricing information.
+                dt MODERATOR
+                    dd Can create, modify, and delete any recipes, as well as see users.
                 dt USER
-                    dd Has read-only access to jobs and customers, with the exception of modifying materials used and time spent for jobs.  USERs can not see any financial information.
+                    dd Can create recipes and can modify only the USER's own recipes.
                 dt GUEST
-                    dd Has read-only access to the system.  Like a USER, except with no write access to anything.
+                    dd Has read-only access to the system.  Users not signed in are GUESTs.
 
 

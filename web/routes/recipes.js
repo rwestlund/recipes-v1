@@ -6,7 +6,7 @@ var Recipe = require('../models/recipe');
 /* GET recipe listing. */
 router.get('/', function(req, res, next) {
     console.log('got request for recipe listing');
-    Recipe.find(function(err, recipes) {
+    Recipe.find().sort('title').exec(function(err, recipes) {
         if (err) return next(err);
         console.log('total recipes found: ' + recipes.length);
         res.send(recipes);
@@ -19,7 +19,7 @@ router.get('/:recipe_id', function(req, res, next) {
     Recipe.findById(req.params.recipe_id,
         function(err, recipe) {
             if (err) return next(err);
-            if (!customer) return res.status(404).end();
+            if (!recipe) return res.status(404).end();
             console.log(recipe.title);
             res.send(recipe);
         }
@@ -39,6 +39,11 @@ router.put('/:recipe_id', function(req, res, next) {
         console.log('param ' + req.params.recipe_id
             + ' does not match body id ' + req.body.id);
         return res.send(400);
+    }
+    if (req.body.tags) {
+        req.body.tags = req.body.tags.map(function(tag) {
+            return tag.toLowerCase();
+        });
     }
     // delete id field or mongo will throw an exception
     delete req.body._id;
@@ -71,6 +76,9 @@ router.post('/', function(req, res, next) {
     console.dir(req.body);
 
     var recipe = new Recipe();
+    recipe.authorId = req.user._id;
+    recipe.ingredients.push('');
+    recipe.directions.push('');
     recipe.save(function(err) {
         if (err) return next(err);
         console.dir(recipe);

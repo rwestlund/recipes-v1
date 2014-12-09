@@ -71,6 +71,7 @@ var recipes = angular.module('recipes', [
                         // save user info
                         $window.localStorage.user_name = user.name;
                         $window.localStorage.user_role = user.role;
+                        $window.localStorage.user_id = user.id;
                         $window.localStorage.user_token =
                             $location.search().token;
                         // put token in cookie for file requests
@@ -99,6 +100,7 @@ var recipes = angular.module('recipes', [
                     // if there's a token there, it's old
                     delete $window.localStorage.user_name;
                     delete $window.localStorage.user_role;
+                    delete $window.localStorage.user_id;
                     delete $window.localStorage.user_token;
                     ipCookie.remove('authorization');
                     console.log("can't get to", $location.path(),
