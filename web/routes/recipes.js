@@ -28,50 +28,58 @@ router.get('/:recipe_id', function(req, res, next) {
 
 // PUT changes to a recipe record
 router.put('/:recipe_id', function(req, res, next) {
-    // access restrictions
-    if (!(req.user.role === 'ADMIN' || req.user.role === 'SALESMAN')) {
-        console.log(req.user.name, 'may not modify recipes');
-        return res.send(403);
-    }
+    // user must be logged in
+    if (!req.user) return res.status(401).end();
 
     console.log('got PUT request for ' + req.body.title);
+
     if (req.body.id != req.params.recipe_id) {
         console.log('param ' + req.params.recipe_id
             + ' does not match body id ' + req.body.id);
         return res.send(400);
     }
-    if (req.body.tags) {
-        req.body.tags = req.body.tags.map(function(tag) {
-            return tag.toLowerCase();
-        });
-    }
-    // delete id field or mongo will throw an exception
-    delete req.body._id;
-    // bump version, save old one for query
-    // TODO use markModified()
-    var version = req.body.__v;
-    req.body.__v = req.body.__v === undefined ? 1 : req.body.__v + 1;
-    // update record
-    Recipe.findOneAndUpdate({ _id: req.params.recipe_id, __v: version },
-        req.body, function(err, recipe) {
-            if(err) return next(err);
-            // if version didn't match, send 409 conflict
-            if (!recipe) return res.status(409).end();
+    
+    Recipe.findById(req.params.recipe_id, function(err, recipe) {
+        if (err) return next(err);
+        // only fancy people or owner
+        if (!(req.user.role === 'ADMIN' || req.user.role === 'MODERATOR'
+            || req.user._id.equals(recipe.authorId)))
+            return res.send(403);
 
-            console.log('updated', recipe.title);
-            res.send(recipe);
+        if (req.body.tags) {
+            req.body.tags = req.body.tags.map(function(tag) {
+                return tag.toLowerCase();
+            });
         }
-    );
+        // delete id field or mongo will throw an exception
+        delete req.body._id;
+        // bump version, save old one for query
+        // TODO use markModified()
+        var version = req.body.__v;
+        req.body.__v = req.body.__v === undefined ? 1 : req.body.__v + 1;
+        // update record
+        Recipe.findOneAndUpdate({ _id: req.params.recipe_id, __v: version },
+            req.body, function(err, recipe) {
+                if(err) return next(err);
+                // if version didn't match, send 409 conflict
+                if (!recipe) return res.status(409).end();
+
+                console.log('updated', recipe.title);
+                res.send(recipe);
+            }
+        );
+    });
 });
 
 // POST a new recipe
 // generally, client will make empty POST request, fill out object, then PUT
 router.post('/', function(req, res, next) {
-    // access restrictions
-    if (!(req.user.role === 'ADMIN' || req.user.role === 'SALESMAN')) {
-        console.log(req.user.name, 'may not create recipes');
+    // user must be logged in
+    if (!req.user) return res.status(401).end();
+    if (!(req.user.role === 'ADMIN' || req.user.role === 'MODERATOR'
+        || req.user.role === 'USER'))
         return res.send(403);
-    }
+
     console.log('got post for new recipe');
     console.dir(req.body);
 
@@ -88,17 +96,22 @@ router.post('/', function(req, res, next) {
 
 // DELETE a recipe
 router.delete('/:recipe_id', function(req, res, next) {
-    // access restrictions
-    if (!(req.user.role === 'ADMIN' || req.user.role === 'SALESMAN')) {
-        console.log(req.user.name, 'may not delete recipes');
-        return res.send(403);
-    }
+    // user must be logged in
+    if (!req.user) return res.status(401).end();
     console.log('got request to delete recipe', req.params.recipe_id);
 
-    Recipe.findByIdAndRemove(req.params.recipe_id, function(err, num) {
+    Recipe.findById(req.params.recipe_id, function(err, recipe) {
         if (err) return next(err);
-        if (!num)  return res.send(404, 'recipe not found');
-        res.status(200).end();
+        // only fancy people or owner
+        if (!(req.user.role === 'ADMIN' || req.user.role === 'MODERATOR'
+            || req.user._id.equals(recipe.authorId)))
+            return res.send(403);
+
+        Recipe.findByIdAndRemove(req.params.recipe_id, function(err, num) {
+            if (err) return next(err);
+            if (!num)  return res.send(404, 'recipe not found');
+            res.status(200).end();
+        });
     });
 });
 

@@ -24,6 +24,7 @@ var templates = require('./routes/templates.js');
 var models = require('./routes/models.js');
 //var files = require('./routes/files.js');
 var recipes = require('./routes/recipes');
+var comments = require('./routes/comments');
 
 
 // init mongoose
@@ -183,6 +184,7 @@ app.use('/users', users);
 app.use('/models', models);
 //app.use('/files', files);
 app.use('/recipes', recipes);
+app.use('/comments', comments);
 
 // logout handler, delete token
 app.delete('/tokens', function(req, res, next) {

@@ -15,7 +15,8 @@ div(collapse='show_advanced')
                 h3.tight Actions
                 button.btn.btn-success.btn-block(ng-click='create_recipe()'
                     ng-disabled="!(window.localStorage.user_role === 'ADMIN' "
-                    + "|| window.localStorage.user_role === 'SALESMAN')")
+                    + "|| window.localStorage.user_role === 'MODERATOR' "
+                    + "|| window.localStorage.user_role === 'USER')")
                     span.glyphicon.glyphicon-plus
                     |  Create Recipe
 
@@ -36,23 +37,35 @@ div(collapse='show_advanced')
                     .col-md-3.col-xs-6
                         // select list of search tags
                         .form-group
-                            label Tags
+                            label Include Tags
                             select.form-control(ng-model='selected_tags'
                                 size='8'
                                 multiple ng-options='tag for tag in tags')
+                    .col-md-3.col-xs-6
+                        // select list of exclude search tags
+                        .form-group
+                            label Exclude Tags
+                            select.form-control(ng-model='deselected_tags'
+                                size='8'
+                                multiple ng-options='tag for tag in deselect_tag_list')
                     .col-md-3.col-xs-6
                         // dropdown for results per page
                         .form-group
                             label Results per Page
                             select.form-control(ng-model='items_per_page')
                                 option(ng-repeat='v in [10,20,50,500]') {{ v }}
+                        .form-group
+                            button.btn.btn-primary.btn-block(
+                                ng-click='selected_tags = []; deselected_tags = []')
+                                span.glyphicon.glyphicon-remove-circle
+                                |  Clear Tags
 
 // search box
-input.form-control(type='search' placeholder='Search' ng-model='query' autofocus)
+input.form-control(type='search' placeholder='Search' ng-model='query')
 
 // filter results and save in 'filtered_recipes', display count
 p {{ query ? "Filtering " + get_showing_text() + " by '" + query + "'" : "Showing " + get_showing_text() }}
-    | ({{  (filtered_recipes = (recipes | hasTags:selected_tags |filter:query )).length + ' records' }})
+    | ({{  (filtered_recipes = (recipes | hasTags:selected_tags:deselected_tags |filter:query )).length + ' records' }})
 
 // this accordion group will have expandable list of customers
 accordion(close-others='false')
@@ -123,14 +136,14 @@ accordion(close-others='false')
 p(ng-hide='recipes.$resolved') Loading data...
 
 // show helpful buttons
-div.text-center(ng-show='recipes.$resolved && filtered_recipes.length < items_per_page && selected_tags.length')
+div.text-center(ng-show='recipes.$resolved && filtered_recipes.length < items_per_page && (selected_tags.length || deselected_tags.length)')
     label Can't find it?
     br
     button.btn.btn-primary(
-        ng-click="selected_tags = []"
+        ng-click="selected_tags = []; deselected_tags = []"
         ) Search All Recipes
 
-div.text-center(ng-show='recipes.$resolved && filtered_recipes.length < items_per_page && !selected_tags.length && can_modify')
+div.text-center(ng-show='recipes.$resolved && filtered_recipes.length < items_per_page && !(selected_tags.length || deselected_tags.length) && can_modify')
     label Not the droids you're looking for?  
     br
     button.btn.btn-success(ng-click='create_recipe()'

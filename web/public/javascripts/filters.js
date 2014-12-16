@@ -13,15 +13,19 @@ var filters = angular.module('filters', [])
     }
 })
 
-// only return elements with a tag array containing all the tags in tags
+// only return elements with a tag array containing all the tags in tags and
+// none of the exclude tags
 .filter('hasTags', function() {
-    return function(array, tags) {
-        if (!tags) return array;
+    return function(array, include_tags, exclude_tags) {
+        if (!(include_tags || exclude_tags)) return array;
         var filtered = [];
         array.forEach(function(item) {
             var skip;
-            tags.forEach(function(tag) {
+            include_tags.forEach(function(tag) {
                 if (item.tags.indexOf(tag) === -1) skip = true;
+            });
+            exclude_tags.forEach(function(tag) {
+                if (item.tags.indexOf(tag) !== -1) skip = true;
             });
             if (!skip) filtered.push(item);
         });

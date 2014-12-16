@@ -1,12 +1,22 @@
 var services = angular.module('services', [ 'ngResource' ])
 
-// we'll call this whenever we want to retrieve customers
+// we'll call this whenever we want to retrieve json resources
 .factory('Recipe', [ '$resource',
     function($resource) {
         return $resource('/recipes/:recipe_id', {}, {
             query: { method: 'GET', isArray: true },
             findById: { method: 'GET' },
             update: { method: 'PUT', params: { recipe_id: '@id' }},
+            delete: { method: 'DELETE' },
+            create: { method: 'POST' }
+        });
+    }
+])
+.factory('Comment', [ '$resource',
+    function($resource) {
+        return $resource('/comments/:recipe_id/:comment_id', {}, {
+            query: { method: 'GET', isArray: true },
+            update: { method: 'PUT', params: { comment_id: '@id' }},
             delete: { method: 'DELETE' },
             create: { method: 'POST' }
         });

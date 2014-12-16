@@ -1,7 +1,6 @@
 Features to Add
 
-- sort directions
-- filter query by title, desc, tags
+- multiline comments
 - info boxes
-- test access restrictions -- user own recipes
-- comments
+- tooltips
+- exclude tags

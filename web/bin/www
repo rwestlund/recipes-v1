@@ -8,8 +8,8 @@ var config = require('../config/config.js');
 
 // get ssl stuff
 var options = {
-    key: fs.readFileSync('config/key.pem'),
-    cert: fs.readFileSync('config/cert.pem'),
+    key: fs.readFileSync(config.ssl_key),
+    cert: fs.readFileSync(config.ssl_cert),
     secureProtocol: 'TLSv1_method',
 };
 

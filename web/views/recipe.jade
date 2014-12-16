@@ -66,6 +66,8 @@
                 dd {{ recipe.source }}
                 dt Notes
                 dd {{ recipe.notes }}
+                dt Created By
+                dd {{ author.name }}
 
     // list of linked recipes
     .col-md-3.col-xs-12
@@ -135,17 +137,21 @@
             fieldset(ng-disabled='!can_modify')
                 // list of directions with buttons to remove
                 // we must track by index and bind to parent object
-                .form-group(
-                        ng-repeat='item in recipe.directions track by $index')
-                    .input-group
-                        label Step {{ $index + 1 }}
-                        textarea.form-control(rows='3' type='text' name=''
-                            ng-model='recipe.directions[$index]' autofocus
-                            ng-disabled='!can_modify')
-                        span.input-group-btn
+                .form-group(ng-repeat='item in recipe.directions track by $index')
+                    label Step {{ $index + 1 }}
+                    .row
+                        .col-xs-10
+                            textarea.form-control(rows='3' type='text' name=''
+                                ng-model='recipe.directions[$index]' autofocus
+                                ng-disabled='!can_modify')
+                        .col-xs-2
                             button.btn.btn-danger(
                                 ng-click='recipe.directions.splice($index,1)')
                                 span.glyphicon.glyphicon-remove
+                            br
+                            button.btn.btn-primary(
+                                ng-click='move_up($index)')
+                                span.glyphicon.glyphicon-chevron-up
 
                 button.btn.btn-success.btn-block(ng-disabled='!can_modify'
                     ng-click='recipe.directions.push("")')
@@ -157,9 +163,6 @@
         form.well
             h3.tight Info
             fieldset(ng-disabled='!can_modify')
-                .form-group
-                    label Created By
-                    p.tight {{ author.name }}
                 .form-group
                     label Title
                     input.form-control(type='text' ng-model='recipe.title')
@@ -182,6 +185,9 @@
                     label Notes
                     textarea.form-control(rows='3' type='text'
                         ng-model='recipe.notes')
+                .form-group
+                    label Created By
+                    p.tight {{ author.name }}
 
         // linked recipes
         form.well
@@ -211,3 +217,45 @@
                         ng-disabled='!can_modify')
                     p.help-block Link relevant recipes to this one, e.g. icing or sauce
 
+// comments                    
+.row
+    .col-md-6
+        .well
+            h3.tight Comments
+            // show all comments
+            .well(ng-repeat='comment in comments')
+                .row
+                    .col-xs-9
+                        .row
+                            .col-xs-12.col-md-6
+                                strong {{ users[comment.authorId].name }}  
+                            .col-xs-12.col-md-6
+                                em {{ comment.timestamp |date:'medium' }}
+                    .col-xs-3
+                        .pull-right(ng-if='user_is(comment.authorId)')
+                            button.btn.btn-warning(ng-disabled='comment.edit'
+                                ng-click='comment.edit = true')
+                                span.glyphicon.glyphicon-pencil
+                            button.btn.btn-danger(
+                                ng-click='open_delete_comment_modal(comment.id)')
+                                span.glyphicon.glyphicon-trash
+
+                p(ng-hide='comment.edit') {{ comment.text }}
+                .form-group(ng-show='comment.edit')
+                    textarea.form-control(rows='3' ng-model='comment.text')
+                    button.btn.btn-success.btn-block(
+                        ng-click='update_comment(comment)'
+                        ng-disabled='!comment.text')
+                        span.glyphicon.glyphicon-plus
+                        |  Update Comment
+
+            // add comment form
+            p(ng-if='!can_comment') You must be logged in to post comments.
+            form(ng-if='can_comment')
+                .form-group
+                    label Add Comment
+                    textarea.form-control(rows='3' ng-model='new_comment.text')
+                button.btn.btn-success.btn-block(ng-click='add_comment()'
+                    ng-disabled='!new_comment.text')
+                    span.glyphicon.glyphicon-plus
+                    |  Post a Comment
