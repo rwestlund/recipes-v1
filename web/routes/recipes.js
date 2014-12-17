@@ -46,9 +46,15 @@ router.put('/:recipe_id', function(req, res, next) {
             || req.user._id.equals(recipe.authorId)))
             return res.send(403);
 
+        // tags and ingredients lowercase
         if (req.body.tags) {
             req.body.tags = req.body.tags.map(function(tag) {
                 return tag.toLowerCase();
+            });
+        }
+        if (req.body.ingredients) {
+            req.body.ingredients = req.body.ingredients.map(function(item) {
+                return item.toLowerCase();
             });
         }
         // delete id field or mongo will throw an exception

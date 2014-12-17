@@ -1,8 +1,8 @@
 .row
-    .col-md-6.col-xs-10
+    .col-md-10.col-xs-7
         h3(style='margin-top:0;') Recipe Listing
-    .col-md-6.col-xs-2
-        button.btn.btn-info.pull-right(
+    .col-md-2.col-xs-5
+        button.btn.btn-info.btn-block.pull-right(
             ng-click='show_advanced = !show_advanced')
             span.glyphicon.glyphicon-collapse-down
             |  Options
@@ -28,7 +28,12 @@ div(collapse='show_advanced')
                 
                 // help collapsible div
                 div(collapse='show_help')
-                    p This list shows all the recipes in the database.  You may filter results by typing in the search box.  It is not case sensitive.  The results will be updated as you type.
+                    p You may filter results by typing in the search box.  It is not case sensitive.  The results will be updated as you type.
+                    p You may search for anything within the recipe.  For example, searching for 'beans' will show all recipes that contain the word 'beans' anywhere in the recipe.
+                    p Recipes can each have multiple tags.  You may use the Include Tags to show only recipes that include those tags.  You may use the Exclude tags to exclude recipes with those tags.  When you change the Include Tags, the Exclude Tags are cleared.
+
+                    p For example, you may search for non-chocolate desserts by selecting 'dessert' from the Include Tags and 'chocolate' from the Exclude Tags.
+                    p Clicking on a record will cause it expand, which is useful for quick browsing.  If you wish to edit the recipe, view comments, or get the permanent link, click 'View Recipe'.
                 br
 
             .col-md-9.col-xs-12
@@ -88,8 +93,11 @@ accordion(close-others='false')
                     span.glyphicon.glyphicon-share-alt
                     |  View Recipe
                 br
+                .well.hidden-md.hidden-lg(ng-if='recipe.summary')
+                    h3.tight Summary
+                    p.tight {{ recipe.summary }}
                 // list of linked recipes
-                .well
+                .well(ng-if='recipe.linked.length')
                     h3.tight Linked Recipes
                     // empty div for formatting
                     .form-group
@@ -100,7 +108,7 @@ accordion(close-others='false')
                             |  {{ get_recipe_name(id) }}
 
             .col-md-3.col-xs-12.col-md-pull-3
-                .well
+                .well.hidden-xs.hidden-sm(ng-if='recipe.summary')
                     h3.tight Summary
                     p.tight {{ recipe.summary }}
                 .well
@@ -112,7 +120,7 @@ accordion(close-others='false')
             .col-md-3.col-xs-12.col-md-pull-3
                 .well
                     h3.tight Directions
-                    ol
+                    ol.recipe-directions
                         li(ng-repeat='item in recipe.directions track by $index'
                             ) {{ item }}
 
@@ -120,16 +128,16 @@ accordion(close-others='false')
                 .well
                     h3.tight Info
                     dl
-                        dt Amount
-                        dd {{ recipe.amount }}
-                        dt Oven Temp
-                        dd {{ recipe.oven }}
-                        dt Time
-                        dd {{ recipe.time }}
-                        dt Source
-                        dd {{ recipe.source }}
-                        dt Notes
-                        dd {{ recipe.notes }}
+                        dt(ng-if='recipe.amount') Amount
+                        dd(ng-if='recipe.amount') {{ recipe.amount }}
+                        dt(ng-if='recipe.oven') Oven Temp
+                        dd(ng-if='recipe.oven') {{ recipe.oven }}
+                        dt(ng-if='recipe.time') Time
+                        dd(ng-if='recipe.time') {{ recipe.time }}
+                        dt(ng-if='recipe.source') Source
+                        dd(ng-if='recipe.source') {{ recipe.source }}
+                        dt(ng-if='recipe.notes') Notes
+                        dd(ng-if='recipe.notes') {{ recipe.notes }}
 
 
 // this goes away once we have data

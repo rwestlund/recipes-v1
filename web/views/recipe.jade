@@ -35,43 +35,13 @@
 
 // display form
 .row(ng-if='!edit_mode')
-    .col-md-3.col-xs-12
-        .well
+    // this col will hold misc actions
+    .col-md-3.col-xs-12.col-md-push-9
+        .well.hidden-md.hidden-lg(ng-if='recipe.summary')
             h3.tight Summary
             p.tight {{ recipe.summary }}
-        .well
-            h3.tight Ingredients
-            ul
-                li(ng-repeat='item in recipe.ingredients track by $index'
-                    ) {{ item }}
-
-    .col-md-3.col-xs-12
-        .well
-            h3.tight Directions
-            ol
-                li(ng-repeat='item in recipe.directions track by $index'
-                    ) {{ item }}
-
-    .col-md-3.col-xs-12
-        .well
-            h3.tight Info
-            dl
-                dt Amount
-                dd {{ recipe.amount }}
-                dt Oven Temp
-                dd {{ recipe.oven }}
-                dt Time
-                dd {{ recipe.time }}
-                dt Source
-                dd {{ recipe.source }}
-                dt Notes
-                dd {{ recipe.notes }}
-                dt Created By
-                dd {{ author.name }}
-
-    // list of linked recipes
-    .col-md-3.col-xs-12
-        .well
+        // list of linked recipes
+        .well(ng-if='recipe.linked.length')
             h3.tight Linked Recipes
             // empty div for formatting
             .form-group
@@ -81,6 +51,39 @@
                     span.glyphicon.glyphicon-share-alt
                     |  {{ get_recipe_name(id) }}
 
+    .col-md-3.col-xs-12.col-md-pull-3
+        .well.hidden-xs.hidden-sm(ng-if='recipe.summary')
+            h3.tight Summary
+            p.tight {{ recipe.summary }}
+        .well
+            h3.tight Ingredients
+            ul
+                li(ng-repeat='item in recipe.ingredients track by $index'
+                    ) {{ item }}
+
+    .col-md-3.col-xs-12.col-md-pull-3
+        .well
+            h3.tight Directions
+            ol.recipe-directions
+                li(ng-repeat='item in recipe.directions track by $index'
+                    ) {{ item }}
+
+    .col-md-3.col-xs-12.col-md-pull-3
+        .well
+            h3.tight Info
+            dl
+                dt(ng-if='recipe.amount') Amount
+                dd(ng-if='recipe.amount') {{ recipe.amount }}
+                dt(ng-if='recipe.oven') Oven Temp
+                dd(ng-if='recipe.oven') {{ recipe.oven }}
+                dt(ng-if='recipe.time') Time
+                dd(ng-if='recipe.time') {{ recipe.time }}
+                dt(ng-if='recipe.source') Source
+                dd(ng-if='recipe.source') {{ recipe.source }}
+                dt(ng-if='recipe.notes') Notes
+                dd(ng-if='recipe.notes') {{ recipe.notes }}
+
+
 // edit form
 .row(ng-if='edit_mode')
     // start recipe ingredients col
@@ -88,13 +91,15 @@
         form.well(role='form')
             h3.tight Ingredients
             fieldset(ng-disabled='!can_modify')
+                p.help-block Abbreviate teaspoon and tablespoon as 'tsp' and 'tbsp', with no period.
 
                 // list of ingredients with buttons to remove
                 // we must track by index and bind to parent object
                 .form-group(
                         ng-repeat='item in recipe.ingredients track by $index')
                     .input-group
-                        input.form-control(type='text' name='' autofocus
+                        // TODO maybe use autofocus only if desktop
+                        input.form-control(type='text' name=''
                             ng-model='recipe.ingredients[$index]'
                             ng-disabled='!can_modify')
                         span.input-group-btn
@@ -113,10 +118,11 @@
             fieldset(ng-disabled='!can_modify')
                 // list of tags with buttons to remove
                 // we must track by index and bind to parent object
+                p.help-block Tags will autocomplete. If possible, use existing tags to keep the list small.  Note that you can search for ingredients, so you don't need tags like 'beans'.
                 .form-group(
                         ng-repeat='item in recipe.tags track by $index')
                     .input-group
-                        input.form-control(type='text' name='' autofocus
+                        input.form-control(type='text' name=''
                             ng-model='recipe.tags[$index]'
                             typeahead='tag for tag in tags | filter:$viewValue | limitTo:8'
                             ng-disabled='!can_modify')
@@ -135,6 +141,7 @@
         form.well(role='form')
             h3.tight Directions
             fieldset(ng-disabled='!can_modify')
+                p.help-block One sentence per step is a good rule of thumb. Capitalized, ends with a period. Use arrows to sort if you need to add a step.
                 // list of directions with buttons to remove
                 // we must track by index and bind to parent object
                 .form-group(ng-repeat='item in recipe.directions track by $index')
@@ -142,7 +149,7 @@
                     .row
                         .col-xs-10
                             textarea.form-control(rows='3' type='text' name=''
-                                ng-model='recipe.directions[$index]' autofocus
+                                ng-model='recipe.directions[$index]'
                                 ng-disabled='!can_modify')
                         .col-xs-2
                             button.btn.btn-danger(
@@ -166,25 +173,32 @@
                 .form-group
                     label Title
                     input.form-control(type='text' ng-model='recipe.title')
+                    p.help-block Name of recipe, capitalized
                 .form-group
                     label Summary
                     input.form-control(type='text' ng-model='recipe.summary')
+                    p.help-block One line, capitalized, ends with a period
                 .form-group
                     label Amount
                     input.form-control(type='text' ng-model='recipe.amount')
+                    p.help-block E.g. makes 2 dozen or serves 4
                 .form-group
                     label Oven Temp
                     input.form-control(type='text' ng-model='recipe.oven')
+                    p.help-block E.g. 350 F
                 .form-group
                     label Time Required
                     input.form-control(type='text' ng-model='recipe.time')
+                    p.help-block Total preparation and cooking time
                 .form-group
                     label Source
                     input.form-control(type='text' ng-model='recipe.source')
+                    p.help-block Where recipe came from, URL or other
                 .form-group
                     label Notes
                     textarea.form-control(rows='3' type='text'
                         ng-model='recipe.notes')
+                    p.help-block Misc info that doesn't have a dedicated box
                 .form-group
                     label Created By
                     p.tight {{ author.name }}
@@ -222,6 +236,7 @@
     .col-md-6
         .well
             h3.tight Comments
+            p.help-block Leave a comment if you have a suggestion or ingredient substitution.  You can edit your own comments later.
             // show all comments
             .well(ng-repeat='comment in comments')
                 .row
@@ -240,7 +255,8 @@
                                 ng-click='open_delete_comment_modal(comment.id)')
                                 span.glyphicon.glyphicon-trash
 
-                p(ng-hide='comment.edit') {{ comment.text }}
+                // split string on \n into paragraphs
+                p(ng-hide='comment.edit' ng-repeat="line in comment.text.split('\n') track by $index") {{ line }}
                 .form-group(ng-show='comment.edit')
                     textarea.form-control(rows='3' ng-model='comment.text')
                     button.btn.btn-success.btn-block(

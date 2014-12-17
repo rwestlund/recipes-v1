@@ -53,7 +53,7 @@ html(ng-app='recipes')
                                 span.icon-bar
                                 span.icon-bar
                                 span.icon-bar
-                            a.navbar-brand(href='/#/') Recipes
+                            a.navbar-brand(href='/#/recipes') Recipes
 
                         .collapse.navbar-collapse(id='navbar-collapse1')
                             ul.nav.navbar-nav
@@ -83,9 +83,11 @@ html(ng-app='recipes')
                                             |  Users
 
 
-                            p.navbar-text.navbar-right(
+                            a.btn.btn-default.btn-sm.navbar-btn.navbar-right(
                                 ng-if='!window.localStorage.user_token'
-                                ) You are not signed in
+                                href='/auth/google')
+                                span.glyphicon.glyphicon-log-in
+                                |  Sign in with Google
 
                             button.btn.btn-default.btn-sm.navbar-btn.navbar-right(
                                 ng-if='window.localStorage.user_token'
@@ -99,8 +101,8 @@ html(ng-app='recipes')
 
                 footer
                     hr
-                    p.tight Version x.x.x
-                    p.tight Released December 5, 2014
+                    p.tight Version 1.0.0
+                    p.tight Released December 17, 2014
                     br
                     br
                     br

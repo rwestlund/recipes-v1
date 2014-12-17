@@ -5,7 +5,12 @@ var User = require('../models/user');
 
 // GET users listing
 router.get('/', function(req, res, next) {
-    // open to anyone, be careful about what to send
+    // access restrictions
+    if (!req.user) return res.status(401).end();
+    if (req.user.role !== 'ADMIN') {
+        console.log(req.user.name, 'may not view users');
+        return res.send(403);
+    }
     console.log('got request for users listing');
     User.find(function(err, users) {
         if (err) return next(err);
