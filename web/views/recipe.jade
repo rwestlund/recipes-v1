@@ -103,6 +103,10 @@
                             ng-model='recipe.ingredients[$index]'
                             ng-disabled='!can_modify')
                         span.input-group-btn
+                            button.btn.btn-primary(
+                                ng-click='move_ingredient_up($index)')
+                                span.glyphicon.glyphicon-chevron-up
+                        span.input-group-btn
                             button.btn.btn-danger(
                                 ng-click='recipe.ingredients.splice($index,1)')
                                 span.glyphicon.glyphicon-remove

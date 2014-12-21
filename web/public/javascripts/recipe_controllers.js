@@ -137,6 +137,15 @@ var recipe_controllers = angular.module('recipe_controllers', [])
                     $scope.recipe.directions[index - 1] = temp;
                 };
 
+                // sort ingredients
+                $scope.move_ingredient_up = function(index) {
+                    if(!index || !$scope.recipe.ingredients.length) return;
+                    var temp = $scope.recipe.ingredients[index];
+                    $scope.recipe.ingredients[index] =
+                        $scope.recipe.ingredients[index - 1];
+                    $scope.recipe.ingredients[index - 1] = temp;
+                };
+
 
                 // executed when recipe is modified
                 $scope.$watch('recipe', function(n, o) {

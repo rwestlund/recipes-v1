@@ -56,7 +56,7 @@ var misc_controllers = angular.module('misc_controllers', [])
                 // called on ok
                 function(data) { console.log('modal resolved:', data); },
                 // called on cancel
-                function(data) { console.log('modal cancelled:', data); }
+                function(data) { console.log('modal canceled:', data); }
             );
          });
 
