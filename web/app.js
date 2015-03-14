@@ -50,9 +50,9 @@ var User = require('./models/user');
 User.count(function(err, count) {
     console.log(count, 'users in DB');
     if(!count) {
-        console.log('adding default admin', config.DEFAULT_ADMIN);
+        console.log('adding default admin', config.default_admin);
         var user = new User({
-            email: config.DEFAULT_ADMIN,
+            email: config.default_admin,
             role: 'ADMIN',
         });
         user.save(function(err) {
@@ -62,7 +62,6 @@ User.count(function(err, count) {
             }
         });
     }
-
 });
 
 
@@ -98,7 +97,7 @@ passport.use(new GoogleStrategy(
     {
         clientID: config.google_client_id,
         clientSecret: config.google_client_secret,
-        callbackURL: config.CALLBACK_URL,
+        callbackURL: config.callback_url,
     },
     function(accessToken, refreshToken, params, profile, callback) {
         console.log('user:', profile.emails[0].value);

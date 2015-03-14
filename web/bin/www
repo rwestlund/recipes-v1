@@ -2,22 +2,12 @@
 var debug = require('debug')('my-application');
 var app = require('../app');
 var http = require('http');
-var https = require('https');
 var fs = require('fs');
 var config = require('../config/config.js');
 
-// get ssl stuff
-var options = {
-    key: fs.readFileSync(config.ssl_key),
-    cert: fs.readFileSync(config.ssl_cert),
-    secureProtocol: 'TLSv1_method',
-};
 
 // launch servers
-http.createServer(app).listen(config.HTTP_PORT, function() {
+http.createServer(app).listen(config.http_port, function() {
     console.log('http is up on', this.address());
-});
-https.createServer(options, app).listen(config.HTTPS_PORT, function() {
-    console.log('https is up on', this.address());
 });
 
