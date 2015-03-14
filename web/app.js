@@ -10,19 +10,14 @@ var compression = require('compression');
 // auth
 var passport = require('passport');
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
-// binary files
-var Grid = require('gridfs-stream');
-// file uploads
-var busboy = require('connect-busboy');
 
-// my custom config file
+// custom config file
 var config = require('./config/config');
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var templates = require('./routes/templates.js');
 var models = require('./routes/models.js');
-//var files = require('./routes/files.js');
 var recipes = require('./routes/recipes');
 var comments = require('./routes/comments');
 
@@ -77,7 +72,6 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(bodyParser.json({ limit: '5mb' }));
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(busboy());
 app.use(cookieParser());
 // cache for one day (number in ms)
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: 86400000 }));
@@ -87,9 +81,6 @@ app.use(passport.initialize());
 // connection setup
 app.use(function(req, res, next) {
     // get configs from DB here
-    // pass gridfs ref
-    req.gfs = Grid(db.db, mongoose.mongo);
-
     next();
 });
 
@@ -146,8 +137,6 @@ app.get('/oauth2callback', function(req, res, next) {
 function ensure_auth(req, res, next) {
     // get token from headers
     var token = req.headers.authorization;
-    // if not there, check cookie (could be file request)
-    if (!token) token = req.cookies.authorization;
     if (!token) {
         console.log('no token present');
         return next();
@@ -169,9 +158,6 @@ function ensure_auth(req, res, next) {
     );
 };
 
-
-
-
 // routes
 app.use('/', routes);
 app.use('/templates', templates);
@@ -181,7 +167,6 @@ app.use('*', ensure_auth);
 
 app.use('/users', users);
 app.use('/models', models);
-//app.use('/files', files);
 app.use('/recipes', recipes);
 app.use('/comments', comments);
 
@@ -215,8 +200,6 @@ app.use(function(req, res, next) {
 
 /// error handlers
 
-// development error handler
-// will print stacktrace
 app.use(function(err, req, res, next) {
     res.status(err.status || 500);
     console.dir(err);
@@ -227,9 +210,6 @@ app.use(function(err, req, res, next) {
         items: [ err.name + ' ' + (err.status || 500), err.message, err.stack ],
     });
 });
-
-// production error handler
-// no stacktraces leaked to user
 
 console.log('initialization complete');
 

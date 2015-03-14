@@ -1,1 +1,4 @@
 web/config/config.js
+node.core
+npm-debug.log
+web/node_modules/
