@@ -24,8 +24,9 @@ This project is provided under the BSD license.
 ## Installation
 - Install nodejs, npm, and mongodb.
 - Clone this repo.
+- cd to web/ and run 'npm install' to fetch dependencies.
 - Copy web/config/config.example.js to web/config/config.js and edit variables.
-- cd to web and run 'npm start' in screen or tmux.
+- cd to web/ and run 'npm start' in screen or tmux.
 - Configure nginx to use TLS and route both http and https connections to node.
 
 ## TODO

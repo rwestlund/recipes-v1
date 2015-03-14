@@ -18,11 +18,6 @@
     "compression": "latest",
     "passport": "latest",
     "passport-google-oauth": "latest",
-    "async": "latest",
-    "mustache": "latest",
-    "latex": "latest",
-    "dateformat": "latest",
-    "connect-busboy": "latest",
-    "gridfs-stream": "latest"
+    "async": "latest"
   }
 }
