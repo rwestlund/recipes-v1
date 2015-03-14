@@ -146,8 +146,6 @@ app.get('/oauth2callback', function(req, res, next) {
 function ensure_auth(req, res, next) {
     // get token from headers
     var token = req.headers.authorization;
-    // if not there, check cookie (could be file request)
-    if (!token) token = req.cookies.authorization;
     if (!token) {
         console.log('no token present');
         return next();
