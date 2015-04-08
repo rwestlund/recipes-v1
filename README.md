@@ -26,8 +26,9 @@ This project is provided under the BSD license.
 - Clone this repo.
 - cd to web/ and run 'npm install' to fetch dependencies.
 - Copy web/config/config.example.js to web/config/config.js and edit variables.
-- cd to web/ and run 'npm start' in screen or tmux.
-- Configure nginx to use TLS and route both http and https connections to node.
+- Use a reverse proxy like nginx to implement TLS and route both http/https
+  connections to node over http.
+- Run 'node bin/www' or use [node-rc](github.com/rwestlund/node-rc)
 
 ## TODO
 - Create a proper startup script to eliminate need for tmux.

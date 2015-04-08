@@ -1,13 +1,43 @@
 #!/usr/bin/env node
+// vim: filetype=javascript
 var debug = require('debug')('my-application');
 var app = require('../app');
 var http = require('http');
 var fs = require('fs');
 var config = require('../config/config.js');
 
+// graceful shutdown
+var shutdown = function(reason) {
+    console.log('shutting down due to', reason, '...');
+    // close server and finish open connections
+    server.close(function() {
+        console.warn('all connections resolved');
+        process.exit(0);
+    });
+};
 
-// launch servers
-http.createServer(app).listen(config.http_port, function() {
+// graceful exit on signals
+process.on('SIGTERM', function() { shutdown("SIGTERM"); }); 
+process.on('SIGINT', function() { shutdown("SIGINT"); }); 
+process.on('uncaughtException', function() { shutdown("uncaughtException"); }); 
+
+// launch server
+var server = http.createServer(app).listen(config.http_port, function() {
+    console.log('pid is', process.pid);
     console.log('http is up on', this.address());
+    // drop root permissions if we started as root
+    if (!process.getuid() || !process.getgid()) {
+        console.log('attempting to drop root priviliges, switching to',
+            process.env.USER, process.env.GROUP);
+        try {
+            process.setgid(process.env.GROUP);
+            process.setuid(process.env.USER);
+        }   
+        catch (err) {
+            console.err(err);
+            console.err('refusing to continue as root');
+            process.exit(1);
+        }   
+    }   
 });
 
