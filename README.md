@@ -28,7 +28,7 @@ This project is provided under the BSD license.
 - Copy web/config/config.example.js to web/config/config.js and edit variables.
 - Use a reverse proxy like nginx to implement TLS and route both http/https
   connections to node over http.
-- Run 'node bin/www' or use [node-rc](github.com/rwestlund/node-rc)
+- Run 'node bin/www' or use [node-rc](http://github.com/rwestlund/node-rc)
 
 ## TODO
 - Create a proper startup script to eliminate need for tmux.
