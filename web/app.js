@@ -1,7 +1,7 @@
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
-var logger = require('morgan');
+var morgan = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
@@ -69,7 +69,27 @@ app.set('view engine', 'jade');
 
 ////TODO make a favicon
 //app.use(favicon(path.join(__dirname, 'public/resources/favicon.ico')));
-app.use(logger('dev'));
+
+// custom morgan tokens
+morgan.token('user', function(req) {
+    if (!req.user) return '-';
+    return req.user.name;
+});
+
+// log apache style to a file
+try {
+    var accessLogStream =
+        fs.createWriteStream(__dirname + '/logs/access.log', {flags: 'a'});
+}
+catch (err) {
+    console.err(err);
+    process.exit(1);
+}
+app.use(morgan(':req[X-Forwarded-For] - :user [:date[clf]] ":method :url '
+    + 'HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"',
+    { stream: accessLogStream } )); 
+// log colored dev output to stdout
+app.use(morgan('dev'));
 app.use(bodyParser.json({ limit: '5mb' }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
