@@ -82,7 +82,7 @@ try {
         fs.createWriteStream(__dirname + '/logs/access.log', {flags: 'a'});
 }
 catch (err) {
-    console.err(err);
+    console.error(err);
     process.exit(1);
 }
 app.use(morgan(':req[X-Forwarded-For] - :user [:date[clf]] ":method :url '
