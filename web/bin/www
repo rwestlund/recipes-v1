@@ -34,8 +34,8 @@ var server = http.createServer(app).listen(config.http_port, function() {
             process.setuid(process.env.USER);
         }   
         catch (err) {
-            console.err(err);
-            console.err('refusing to continue as root');
+            console.error(err);
+            console.error('refusing to continue as root');
             process.exit(1);
         }   
     }   
