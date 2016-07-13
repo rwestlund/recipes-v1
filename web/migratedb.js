@@ -34,12 +34,12 @@ pg.connect({ user: 'pgsql', database: 'recipes' }, function(err, client, done) {
                 console.log('users found: ' + users.length);
                 async.eachSeries(users, function(user, next2) {
                     client.query("INSERT INTO users "
-                            + "(email, name, role, date_created, lastlog) "
+                            + "(email, name, role, creation_date, lastlog) "
                             + "VALUES ($1, $2, $3, $4, $5) "
                             + "RETURNING id",
                             [ user.email,
-                            user.name,
-                            user.role.toLowerCase(),
+                            user.name || null,
+                            user.role.charAt(0) + user.role.slice(1).toLowerCase(),
                             user._id.getTimestamp(),
                             user.lastlog ],
                         // fill author map
