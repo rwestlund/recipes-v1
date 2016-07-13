@@ -9,6 +9,9 @@ A nodejs webserver for a simple recipe website.
 
 ## Description
 
+**NOTE:** This version is deprecated.  The new version is at
+[https://github.com/rwestlund/recipes]()
+
 This project provides a simple website where people can post, share, and
 comment on recipes.
 
